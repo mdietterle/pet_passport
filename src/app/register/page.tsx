@@ -15,6 +15,7 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -32,6 +33,7 @@ export default function RegisterPage() {
             password,
             options: {
                 data: { full_name: fullName },
+                emailRedirectTo: `${window.location.origin}/api/auth/confirm`,
             },
         });
 
@@ -41,8 +43,8 @@ export default function RegisterPage() {
                 : 'Erro ao criar conta. Tente novamente.');
             setLoading(false);
         } else {
-            router.push('/dashboard');
-            router.refresh();
+            setSuccessMsg('Conta criada! Enviamos um link de confirmação para o seu e-mail. Por favor, verifique sua caixa de entrada (ou spam) para ativar sua conta e acessar a plataforma.');
+            setLoading(false);
         }
     }
 
@@ -68,81 +70,92 @@ export default function RegisterPage() {
                             </div>
                         )}
 
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="fullName">Nome completo</label>
-                            <input
-                                id="fullName"
-                                type="text"
-                                className="form-input"
-                                placeholder="Seu nome"
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                required
-                                autoComplete="name"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="email">Email</label>
-                            <input
-                                id="email"
-                                type="email"
-                                className="form-input"
-                                placeholder="seu@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                autoComplete="email"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="password">Senha</label>
-                            <div className="input-with-icon">
-                                <input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    className="form-input"
-                                    placeholder="Mínimo 6 caracteres"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    autoComplete="new-password"
-                                />
-                                <button
-                                    type="button"
-                                    className="input-icon-btn"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    tabIndex={-1}
-                                >
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                </button>
+                        {successMsg ? (
+                            <div style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '1.5rem', borderRadius: '8px', border: '1px solid #4ade80', textAlign: 'center', lineHeight: '1.5' }}>
+                                <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem', color: '#fff' }}>💌 Verifique seu e-mail</h3>
+                                <p>{successMsg}</p>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="fullName">Nome completo</label>
+                                    <input
+                                        id="fullName"
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Seu nome"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        required
+                                        autoComplete="name"
+                                    />
+                                </div>
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary btn-lg"
-                            style={{ width: '100%', justifyContent: 'center' }}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 size={18} className="animate-spin" />
-                                    Criando conta...
-                                </>
-                            ) : (
-                                'Criar conta grátis'
-                            )}
-                        </button>
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="email">Email</label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        className="form-input"
+                                        placeholder="seu@email.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        autoComplete="email"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label" htmlFor="password">Senha</label>
+                                    <div className="input-with-icon">
+                                        <input
+                                            id="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            className="form-input"
+                                            placeholder="Mínimo 6 caracteres"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            autoComplete="new-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="input-icon-btn"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            tabIndex={-1}
+                                        >
+                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary btn-lg"
+                                    style={{ width: '100%', justifyContent: 'center' }}
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Loader2 size={18} className="animate-spin" />
+                                            Criando conta...
+                                        </>
+                                    ) : (
+                                        'Criar conta grátis'
+                                    )}
+                                </button>
+                            </>
+                        )}
                     </form>
 
-                    <p className="auth-footer">
-                        Já tem uma conta?{' '}
-                        <Link href="/login" className="auth-link">
-                            Entrar
-                        </Link>
-                    </p>
+                    {!successMsg && (
+                        <p className="auth-footer">
+                            Já tem uma conta?{' '}
+                            <Link href="/login" className="auth-link">
+                                Entrar
+                            </Link>
+                        </p>
+                    )}
                 </div>
             </div>
 
