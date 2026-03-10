@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -14,6 +14,15 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        // Read error from URL if redirected from auth/confirm
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlError = searchParams.get('error');
+        if (urlError) {
+            setError(urlError);
+        }
+    }, []);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
