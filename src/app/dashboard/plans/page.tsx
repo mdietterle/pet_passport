@@ -34,19 +34,9 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
           Plano atual: <strong style={{ color: 'var(--color-teal-light)' }}>{currentPlan?.display_name || 'Gratuito'}</strong>
         </p>
         
-        {searchParams.success === 'true' && (
-          <div style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #4ade80' }}>
-            🎉 Assinatura confirmada com sucesso via Stripe!
-          </div>
-        )}
         {searchParams.abacate_success === 'true' && (
           <div style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #4ade80' }}>
             🥑 Pagamento PIX iniciado. Assim que confirmado, seu plano será atualizado!
-          </div>
-        )}
-        {searchParams.canceled === 'true' && (
-          <div style={{ background: 'rgba(248, 113, 113, 0.1)', color: '#f87171', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #f87171' }}>
-            ⚠️ Pagamento cancelado.
           </div>
         )}
       </div>
@@ -103,17 +93,6 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
                   </button>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', width: '100%' }}>
-                    <form action="/api/checkout" method="POST" style={{ width: '100%' }}>
-                      <input type="hidden" name="planId" value={plan.id} />
-                      <input type="hidden" name="priceId" value={plan.stripe_price_id || ''} />
-                      <button
-                        type="submit"
-                        className={`btn btn-${plan.name === 'pro' ? 'primary' : 'secondary'}`}
-                        style={{ width: '100%', justifyContent: 'center' }}
-                      >
-                        💳 {currentPlan && currentPlan.sort_order > plan.sort_order ? 'Downgrade' : 'Cartão de Crédito'}
-                      </button>
-                    </form>
 
                     {/* Abacate Pay Checkout */}
                     {(!userProfile?.tax_id || !userProfile?.cellphone) ? (
@@ -141,7 +120,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
       </div>
 
       <div className="plans-note">
-        <p>💳 Pagamentos processados com segurança pelo Stripe. Cancele a qualquer momento.</p>
+        <p>✨ Pagamentos processados instantaneamente via PIX (Abacate Pay).</p>
       </div>
 
       <style>{`

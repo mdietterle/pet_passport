@@ -33,7 +33,6 @@ export default function PlansEditor({ plans: initPlans }: { plans: Plan[] }) {
             max_vaccinations_per_pet: plan.max_vaccinations_per_pet,
             max_consultations_per_pet: plan.max_consultations_per_pet,
             max_occurrences_per_pet: plan.max_occurrences_per_pet,
-            stripe_price_id: plan.stripe_price_id,
             features: plan.features,
         }).eq('id', plan.id);
         setSaving(null);
@@ -95,10 +94,6 @@ export default function PlansEditor({ plans: initPlans }: { plans: Plan[] }) {
                         <div className="form-group">
                             <label className="form-label">Preço (R$)</label>
                             <input type="number" step="0.01" min="0" className="form-input" value={plan.price_brl} onChange={(e) => updateLocal(plan.id, 'price_brl', parseFloat(e.target.value))} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Stripe Price ID</label>
-                            <input className="form-input" placeholder="price_xxx" value={plan.stripe_price_id ?? ''} onChange={(e) => updateLocal(plan.id, 'stripe_price_id', e.target.value || null)} />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Máx. pets <span style={{ color: 'var(--color-text-muted)' }}>(vazio={nullLabel})</span></label>

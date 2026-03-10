@@ -70,7 +70,6 @@ export interface Plan {
     name: 'free' | 'basic' | 'pro' | 'premium';
     display_name: string;
     price_brl: number;
-    stripe_price_id: string | null;
     max_pets: number | null;
     max_vaccinations_per_pet: number | null;
     max_consultations_per_pet: number | null;
@@ -85,8 +84,6 @@ export interface Profile {
     full_name: string | null;
     avatar_url: string | null;
     plan_id: string | null;
-    stripe_customer_id: string | null;
-    stripe_subscription_id: string | null;
     subscription_status: string | null;
     cellphone: string | null;
     tax_id: string | null;
