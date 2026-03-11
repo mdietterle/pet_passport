@@ -14,6 +14,14 @@ export async function POST(request: NextRequest) {
         const status = billing.status;
         const eventType = payload.event;
         
+        // Initialize Supabase Admin strictly for logging so we don't need a session
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
+        // ALWAYS LOG THE INCOMING PAYLOAD TO DATABASE TO DEBUG ABACATEPAY
+        await supabaseAdmin.from('webhook_logs').insert([{ payload: payload }]);
+
         // We only care about PAID status or "billing.paid"
         if (status === 'PAID' || eventType === 'billing.paid') {
             const customer = billing.customer;
@@ -49,17 +57,6 @@ export async function POST(request: NextRequest) {
                 }
             }
             
-            // Initialize Supabase with Service Role to bypass RLS
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-            
-            if (!supabaseUrl || !supabaseKey) {
-                console.error("Missing Supabase Service Role configuration");
-                return NextResponse.json({ error: "Server Configuration Error" }, { status: 500 });
-            }
-            
-            const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
-
             if (userId && planId) {
                 // Update the user's plan by User ID
                 const { error } = await supabaseAdmin

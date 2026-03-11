@@ -1,5 +1,3 @@
-
-
 async function testVercelWebhook() {
   const payload = {
     event: 'billing.paid',
@@ -9,7 +7,7 @@ async function testVercelWebhook() {
       products: [],
       metadata: {
         returnUrl: "https://pet-passport-sigma.vercel.app/dashboard/plans",
-        completionUrl: "https://pet-passport-sigma.vercel.app/dashboard/plans?abacate_success=true&plan=69955643-1ed7-43bd-9d8d-5e6bdb819671&user=66b725be-fe7f-48e9-a85e-646eb348127d"
+        completionUrl: "https://pet-passport-sigma.vercel.app/dashboard/plans?abacate_success=true&plan=67056299-882e-4d0a-b6b7-f999888ca7f5&user=c521e60f-083b-4a85-9e64-f10ecae3119f"
       }
     }
   };
