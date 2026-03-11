@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
                 },
             ],
             returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/plans`,
-            completionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/plans?abacate_success=true&plan=${plan.id}`,
+            completionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/plans?abacate_success=true&plan=${plan.id}&user=${user.id}`,
             customer: {
                 name: profile?.full_name || 'Usuário',
                 email: user.email || '',

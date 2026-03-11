@@ -18,16 +18,33 @@ export async function POST(request: NextRequest) {
         if (status === 'PAID' || eventType === 'billing.paid') {
             const customer = billing.customer;
             
-            // Extract the user and plan IDs from the composite externalId we set during checkout
-            let userId = customer?.metadata?.supabase_user_id; // Keeping for backwards compatibility if metadata ever gets supported
+            // Extract the user and plan IDs
+            let userId = customer?.metadata?.supabase_user_id; // Keeping for backwards compatibility
             let planId = customer?.metadata?.plan_id;
             
             if (!userId || !planId) {
-                if (billing.products && billing.products.length > 0 && billing.products[0].externalId) {
-                    const parts = billing.products[0].externalId.split('_');
-                    if (parts.length === 2) {
-                        userId = parts[0];
-                        planId = parts[1];
+                // Try parsing from completionUrl in metadata
+                const completionUrlStr = billing.metadata?.completionUrl;
+                if (completionUrlStr) {
+                    try {
+                        const url = new URL(completionUrlStr, 'http://localhost'); // base url fallback just in case
+                        const urlUserId = url.searchParams.get('user');
+                        const urlPlanId = url.searchParams.get('plan');
+                        if (urlUserId) userId = urlUserId;
+                        if (urlPlanId) planId = urlPlanId;
+                    } catch (e) {
+                         console.error("Failed to parse completionUrl", e);
+                    }
+                }
+
+                // Fallback to externalId if completionUrl didn't work and externalId exists
+                if (!userId || !planId) {
+                    if (billing.products && billing.products.length > 0 && billing.products[0].externalId) {
+                        const parts = billing.products[0].externalId.split('_');
+                        if (parts.length === 2) {
+                            userId = parts[0];
+                            planId = parts[1];
+                        }
                     }
                 }
             }
