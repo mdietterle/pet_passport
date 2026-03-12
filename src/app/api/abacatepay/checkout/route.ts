@@ -51,10 +51,11 @@ export async function POST(request: NextRequest) {
         }
 
         // Initialize Abacate Pay SDK
-        const apiKey = process.env.ABACATEPAY_API_KEY;
-        if (!apiKey) {
-            console.error('ABACATEPAY_API_KEY is not defined in environment variables');
-            return NextResponse.json({ error: 'Payment gateway configuration error' }, { status: 500 });
+        // Forçando o uso do ambiente de Sandbox (DEV) conforme solicitado para testes com cartão
+        const apiKey = process.env.ABACATEPAY_DEV_API_KEY || 'abc_dev_r6ahpqyagGx5Lg03XUHE5Nb5';
+        
+        if (!process.env.ABACATEPAY_API_KEY?.startsWith('abc_dev')) {
+            console.warn('Using ABACATEPAY Sandbox key instead of Production key');
         }
 
         const abacate = AbacatePay(apiKey);
