@@ -100,16 +100,30 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
                         Para pagar com PIX, preencha seu <strong>CPF e Celular</strong> em <Link href="/dashboard/profile" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>Meu Perfil</Link>.
                       </div>
                     ) : (
-                      <form action="/api/abacatepay/checkout" method="POST" style={{ width: '100%' }}>
-                        <input type="hidden" name="planId" value={plan.id} />
-                        <button
-                          type="submit"
-                          className="btn btn-secondary"
-                          style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--color-teal)', color: 'var(--color-teal)' }}
-                        >
-                          ✨ PIX (Abacate Pay)
-                        </button>
-                      </form>
+                      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                        <form action="/api/abacatepay/checkout" method="POST" style={{ flex: 1 }}>
+                          <input type="hidden" name="planId" value={plan.id} />
+                          <input type="hidden" name="paymentMethod" value="PIX" />
+                          <button
+                            type="submit"
+                            className="btn btn-secondary"
+                            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--color-teal)', color: 'var(--color-teal)', padding: '8px 4px', fontSize: '0.9rem' }}
+                          >
+                            ✨ PIX
+                          </button>
+                        </form>
+                        <form action="/api/abacatepay/checkout" method="POST" style={{ flex: 1 }}>
+                          <input type="hidden" name="planId" value={plan.id} />
+                          <input type="hidden" name="paymentMethod" value="CARD" />
+                          <button
+                            type="submit"
+                            className="btn btn-secondary"
+                            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--color-indigo)', color: 'var(--color-indigo)', padding: '8px 4px', fontSize: '0.9rem' }}
+                          >
+                            💳 Cartão
+                          </button>
+                        </form>
+                      </div>
                     )}
                   </div>
                 )}
@@ -120,7 +134,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
       </div>
 
       <div className="plans-note">
-        <p>✨ Pagamentos processados instantaneamente via PIX (Abacate Pay).</p>
+        <p>✨ Pagamentos de Pix e Cartão processados com segurança pelo Abacate Pay.</p>
       </div>
 
       <style>{`

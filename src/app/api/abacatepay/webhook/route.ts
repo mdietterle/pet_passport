@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
             // Extract the user and plan IDs
             let userId = customer?.metadata?.supabase_user_id; // Keeping for backwards compatibility
             let planId = customer?.metadata?.plan_id;
+            let paymentMethod = 'PIX'; // Default to PIX
             
             if (!userId || !planId) {
                 // Try parsing from completionUrl in metadata
@@ -38,8 +39,10 @@ export async function POST(request: NextRequest) {
                         const url = new URL(completionUrlStr, 'http://localhost'); // base url fallback just in case
                         const urlUserId = url.searchParams.get('user');
                         const urlPlanId = url.searchParams.get('plan');
+                        const urlMethod = url.searchParams.get('method');
                         if (urlUserId) userId = urlUserId;
                         if (urlPlanId) planId = urlPlanId;
+                        if (urlMethod) paymentMethod = urlMethod;
                     } catch (e) {
                          console.error("Failed to parse completionUrl", e);
                     }
@@ -58,12 +61,18 @@ export async function POST(request: NextRequest) {
             }
             
             if (userId && planId) {
+                // Determine expiration (30 days from now)
+                const expiresAt = new Date();
+                expiresAt.setDate(expiresAt.getDate() + 30);
+
                 // Update the user's plan by User ID
                 const { error } = await supabaseAdmin
                     .from('profiles')
                     .update({
                         plan_id: planId,
-                        subscription_status: 'active'
+                        subscription_status: 'active',
+                        payment_method: paymentMethod,
+                        plan_expires_at: expiresAt.toISOString()
                     })
                     .eq('id', userId);
 

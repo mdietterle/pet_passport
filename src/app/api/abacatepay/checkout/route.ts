@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const rawPlanId = formData.get('planId') as string;
         const planId = rawPlanId?.trim();
+        const paymentMethod = (formData.get('paymentMethod') as string) || 'PIX';
 
         if (!planId) {
             return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
         
         const payload = {
             frequency: "ONE_TIME",
-            methods: ["PIX"],
+            methods: [paymentMethod],
             products: [
                 {
                     externalId: `${user.id}_${plan.id}`,
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
                 },
             ],
             returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/plans`,
-            completionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/plans?abacate_success=true&plan=${plan.id}&user=${user.id}`,
+            completionUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/plans?abacate_success=true&plan=${plan.id}&user=${user.id}&method=${paymentMethod}`,
             customer: {
                 name: profile?.full_name || 'Usuário',
                 email: user.email || '',
