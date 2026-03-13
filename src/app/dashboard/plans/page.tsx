@@ -5,7 +5,7 @@ import { Check, Zap } from 'lucide-react';
 import { PLAN_COLORS, PLAN_ICONS } from '@/lib/planUtils';
 
 
-export default async function PlansPage({ searchParams }: { searchParams: { success?: string, canceled?: string, abacate_success?: string } }) {
+export default async function PlansPage({ searchParams }: { searchParams: { success?: string, canceled?: string, stripe_success?: string, stripe_canceled?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -34,9 +34,14 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
           Plano atual: <strong style={{ color: 'var(--color-teal-light)' }}>{currentPlan?.display_name || 'Gratuito'}</strong>
         </p>
         
-        {searchParams.abacate_success === 'true' && (
+        {searchParams.stripe_success === 'true' && (
           <div style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #4ade80' }}>
-            🥑 Pagamento PIX iniciado. Assim que confirmado, seu plano será atualizado!
+            🎉 Checkout iniciado. Seu plano será atualizado assim que o pagamento for confirmado!
+          </div>
+        )}
+        {searchParams.stripe_canceled === 'true' && (
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #ef4444' }}>
+            ⚠️ Pagamento cancelado ou não concluído.
           </div>
         )}
       </div>
@@ -94,37 +99,17 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', width: '100%' }}>
 
-                    {/* Abacate Pay Checkout */}
-                    {(!userProfile?.tax_id || !userProfile?.cellphone) ? (
-                      <div style={{ marginTop: '8px', padding: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #f59e0b', borderRadius: '8px', fontSize: '0.8rem', textAlign: 'center', color: '#b45309' }}>
-                        Para pagar com PIX, preencha seu <strong>CPF e Celular</strong> em <Link href="/dashboard/profile" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>Meu Perfil</Link>.
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                        <form action="/api/abacatepay/checkout" method="POST" style={{ flex: 1 }}>
-                          <input type="hidden" name="planId" value={plan.id} />
-                          <input type="hidden" name="paymentMethod" value="PIX" />
-                          <button
-                            type="submit"
-                            className="btn btn-secondary"
-                            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--color-teal)', color: 'var(--color-teal)', padding: '8px 4px', fontSize: '0.9rem' }}
-                          >
-                            ✨ PIX
-                          </button>
-                        </form>
-                        <form action="/api/abacatepay/checkout" method="POST" style={{ flex: 1 }}>
-                          <input type="hidden" name="planId" value={plan.id} />
-                          <input type="hidden" name="paymentMethod" value="CARD" />
-                          <button
-                            type="submit"
-                            className="btn btn-secondary"
-                            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--color-indigo)', color: 'var(--color-indigo)', padding: '8px 4px', fontSize: '0.9rem' }}
-                          >
-                            💳 Cartão
-                          </button>
-                        </form>
-                      </div>
-                    )}
+                    {/* Stripe Checkout */}
+                    <form action="/api/stripe/checkout" method="POST" style={{ width: '100%' }}>
+                      <input type="hidden" name="planId" value={plan.id} />
+                      <button
+                        type="submit"
+                        className="btn btn-secondary"
+                        style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--color-indigo)', color: 'var(--color-indigo)', padding: '10px 4px', fontSize: '1rem', fontWeight: 'bold' }}
+                      >
+                        💳 Assinar com Stripe
+                      </button>
+                    </form>
                   </div>
                 )}
               </div>
@@ -134,7 +119,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
       </div>
 
       <div className="plans-note">
-        <p>✨ Pagamentos de Pix e Cartão processados com segurança pelo Abacate Pay.</p>
+        <p>✨ Pagamentos de PIX e Cartão processados com segurança pelo Stripe.</p>
       </div>
 
       <style>{`
