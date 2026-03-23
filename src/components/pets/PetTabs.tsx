@@ -4,12 +4,32 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Database } from '@/lib/supabase/types';
-import { Plus, Trash2, Edit, Loader2, Syringe, Stethoscope, AlertCircle, X, Check, Paperclip, Sparkles } from 'lucide-react';
-import type { Pet, Vaccination, VetConsultation, Occurrence, Plan, PetWeight, ParasiteControl, Medication, ExamAttachment } from '@/lib/supabase/types';
+import { Plus, Trash2, Edit, Loader2, Syringe, Stethoscope, AlertCircle, X, Check, Paperclip, Sparkles, ChevronDown, ChevronUp, Pill } from 'lucide-react';
+import type { Pet, Vaccination, VetConsultation, Occurrence, Plan, PetWeight, ParasiteControl, Medication, ExamAttachment, Treatment, TreatmentType, TreatmentStatus } from '@/lib/supabase/types';
 import { OCCURRENCE_TYPE_LABELS, checkPlanLimits } from '@/lib/planLimits';
 import { canUploadExams } from '@/lib/planFeatures';
 import { formatDate } from '@/lib/dateUtils';
 import DocumentUpload, { type UploadedDoc, type PrescriptionData } from '@/components/DocumentUpload';
+
+const TREATMENT_TYPE_LABELS: Record<TreatmentType, string> = {
+    medication: '💊 Medicamento',
+    therapy: '🩺 Terapia',
+    surgery: '🔪 Cirurgia',
+    procedure: '📋 Procedimento',
+    other: '📌 Outro',
+};
+
+const TREATMENT_STATUS_LABELS: Record<TreatmentStatus, string> = {
+    active: 'Ativo',
+    completed: 'Concluído',
+    cancelled: 'Cancelado',
+};
+
+const TREATMENT_STATUS_CLASS: Record<TreatmentStatus, string> = {
+    active: 'badge-orange',
+    completed: 'badge-gray',
+    cancelled: 'badge-gold',
+};
 
 interface Props {
     pet: Pet;
@@ -20,12 +40,13 @@ interface Props {
     parasites: ParasiteControl[];
     medications: Medication[];
     examAttachments: ExamAttachment[];
+    treatments: Treatment[];
     plan: Plan | null;
 }
 
 type TabId = 'vaccinations' | 'consultations' | 'occurrences' | 'weights' | 'parasites' | 'medications';
 
-export default function PetTabs({ pet, vaccinations: initVacc, consultations: initConsult, occurrences: initOccur, weights: initWeights, parasites: initParasites, medications: initMeds, examAttachments: initExamAttachments, plan }: Props) {
+export default function PetTabs({ pet, vaccinations: initVacc, consultations: initConsult, occurrences: initOccur, weights: initWeights, parasites: initParasites, medications: initMeds, examAttachments: initExamAttachments, treatments: initTreatments, plan }: Props) {
     const router = useRouter();
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState<TabId>('vaccinations');
@@ -36,12 +57,15 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [parasites, setParasites] = useState(initParasites);
     const [medications, setMedications] = useState(initMeds);
     const [examAttachments, setExamAttachments] = useState<ExamAttachment[]>(initExamAttachments);
+    const [treatments, setTreatments] = useState<Treatment[]>(initTreatments);
     const [examUploading, setExamUploading] = useState(false);
     const [examConsultId, setExamConsultId] = useState<string | null>(null);
-    const [showModal, setShowModal] = useState<TabId | null>(null);
+    const [showModal, setShowModal] = useState<TabId | 'treatment' | null>(null);
     const [editItem, setEditItem] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [expandedConsult, setExpandedConsult] = useState<string | null>(null);
+    const [treatmentConsultId, setTreatmentConsultId] = useState<string | null>(null);
     // Uploaded docs per modal: reset when modal opens
     const [vaccDocs, setVaccDocs] = useState<UploadedDoc[]>([]);
     const [consultDocs, setConsultDocs] = useState<UploadedDoc[]>([]);
@@ -205,13 +229,83 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
         closeModal();
     }
 
+    // ─── Treatment Form ──────────────────────────────────────────────────
+    const [treatForm, setTreatForm] = useState({ name: '', type: 'medication' as TreatmentType, dosage: '', frequency: '', duration: '', application_method: '', start_date: new Date().toISOString().split('T')[0], end_date: '', status: 'active' as TreatmentStatus, notes: '' });
+
+    async function saveTreatment() {
+        if (!treatmentConsultId) return;
+        setLoading(true);
+        const data = {
+            consultation_id: treatmentConsultId,
+            pet_id: pet.id,
+            name: treatForm.name,
+            type: treatForm.type,
+            dosage: treatForm.dosage || null,
+            frequency: treatForm.frequency || null,
+            duration: treatForm.duration || null,
+            application_method: treatForm.application_method || null,
+            start_date: treatForm.start_date || null,
+            end_date: treatForm.end_date || null,
+            status: treatForm.status,
+            notes: treatForm.notes || null,
+        };
+        if (editItem) {
+            const { data: updated } = await (supabase.from('treatments') as any).update(data).eq('id', editItem.id).select().single();
+            if (updated) setTreatments((prev) => prev.map((t) => t.id === updated.id ? updated : t));
+        } else {
+            const { data: created } = await (supabase.from('treatments') as any).insert(data).select().single();
+            if (created) setTreatments((prev) => [created, ...prev]);
+        }
+        setLoading(false);
+        closeTreatmentModal();
+    }
+
+    async function deleteTreatment(id: string) {
+        setDeleteId(id);
+        await (supabase.from('treatments') as any).delete().eq('id', id);
+        setTreatments((prev) => prev.filter((t) => t.id !== id));
+        setDeleteId(null);
+    }
+
+    function openTreatmentAdd(consultId: string) {
+        setEditItem(null);
+        setTreatmentConsultId(consultId);
+        setTreatForm({ name: '', type: 'medication', dosage: '', frequency: '', duration: '', application_method: '', start_date: new Date().toISOString().split('T')[0], end_date: '', status: 'active', notes: '' });
+        setShowModal('treatment');
+    }
+
+    function openTreatmentEdit(t: Treatment) {
+        setEditItem(t);
+        setTreatmentConsultId(t.consultation_id);
+        setTreatForm({
+            name: t.name,
+            type: t.type,
+            dosage: t.dosage || '',
+            frequency: t.frequency || '',
+            duration: t.duration || '',
+            application_method: t.application_method || '',
+            start_date: t.start_date || '',
+            end_date: t.end_date || '',
+            status: t.status,
+            notes: t.notes || '',
+        });
+        setShowModal('treatment');
+    }
+
+    function closeTreatmentModal() {
+        setShowModal(null);
+        setEditItem(null);
+        setTreatmentConsultId(null);
+        setTreatForm({ name: '', type: 'medication', dosage: '', frequency: '', duration: '', application_method: '', start_date: new Date().toISOString().split('T')[0], end_date: '', status: 'active', notes: '' });
+    }
+
     // ─── Delete ─────────────────────────────────────────────────────────
     async function handleDelete(tab: TabId, id: string) {
         setDeleteId(id);
         const table = tab === 'vaccinations' ? 'vaccinations' : tab === 'consultations' ? 'vet_consultations' : tab === 'occurrences' ? 'occurrences' : tab === 'weights' ? 'pet_weights' : tab === 'parasites' ? 'parasite_controls' : 'medications';
         await (supabase.from(table) as any).delete().eq('id', id);
         if (tab === 'vaccinations') setVaccinations((prev) => prev.filter((v) => v.id !== id));
-        if (tab === 'consultations') setConsultations((prev) => prev.filter((c) => c.id !== id));
+        if (tab === 'consultations') { setConsultations((prev) => prev.filter((c) => c.id !== id)); setTreatments((prev) => prev.filter((t) => t.consultation_id !== id)); }
         if (tab === 'occurrences') setOccurrences((prev) => prev.filter((o) => o.id !== id));
         if (tab === 'weights') setWeights((prev) => prev.filter((w) => w.id !== id));
         if (tab === 'parasites') setParasites((prev) => prev.filter((p) => p.id !== id));
@@ -296,7 +390,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         {limits && !limits.canAddVaccination ? (
                             <div className="alert alert-warning" style={{ flex: 1 }}>
-                                ⚠️ Limite de vacinas atingido no seu plano. <a href="/dashboard/plans" style={{ color: 'var(--color-amber-light)', fontWeight: 600 }}>Fazer upgrade</a>
+                                ⚠️ Limite de vacinas atingido no seu plano. <a href="/dashboard/plans" style={{ color: 'var(--color-gold-light)', fontWeight: 600 }}>Fazer upgrade</a>
                             </div>
                         ) : (
                             <button className="btn btn-primary btn-sm" onClick={() => { setEditItem(null); setVaccForm({ vaccine_name: '', date: '', next_due_date: '', vet_name: '', clinic: '', batch: '', manufacturer: '', notes: '' }); setShowModal('vaccinations'); }}>
@@ -315,7 +409,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                         <tr key={v.id}>
                                             <td style={{ fontWeight: 600 }}>{v.vaccine_name}</td>
                                             <td>{formatDate(v.date)}</td>
-                                            <td>{v.next_due_date ? <span className="badge badge-amber">{formatDate(v.next_due_date)}</span> : '—'}</td>
+                                            <td>{v.next_due_date ? <span className="badge badge-gold">{formatDate(v.next_due_date)}</span> : '—'}</td>
                                             <td style={{ color: 'var(--color-text-secondary)' }}>{v.vet_name || '—'}</td>
                                             <td style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>{v.batch || '—'}</td>
                                             <td>
@@ -339,7 +433,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         {limits && !limits.canAddConsultation ? (
                             <div className="alert alert-warning" style={{ flex: 1 }}>
-                                ⚠️ Limite de consultas atingido. <a href="/dashboard/plans" style={{ color: 'var(--color-amber-light)', fontWeight: 600 }}>Fazer upgrade</a>
+                                ⚠️ Limite de consultas atingido. <a href="/dashboard/plans" style={{ color: 'var(--color-gold-light)', fontWeight: 600 }}>Fazer upgrade</a>
                             </div>
                         ) : (
                             <button className="btn btn-primary btn-sm" onClick={() => { setEditItem(null); setConsultForm({ date: '', vet_name: '', clinic: '', reason: '', diagnosis: '', prescription: '', cost_brl: '', follow_up_date: '', notes: '' }); setShowModal('consultations'); }}>
@@ -352,23 +446,86 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                     ) : (
                         <div className="table-container">
                             <table>
-                                <thead><tr><th>Data</th><th>Motivo</th><th>Veterinário</th><th>Clínica</th><th>Custo</th><th></th></tr></thead>
+                                <thead><tr><th>Data</th><th>Motivo</th><th>Veterinário</th><th>Clínica</th><th>Custo</th><th>Trat.</th><th></th></tr></thead>
                                 <tbody>
-                                    {consultations.map((c) => (
-                                        <tr key={c.id}>
-                                            <td style={{ whiteSpace: 'nowrap' }}>{formatDate(c.date)}</td>
-                                            <td style={{ fontWeight: 600 }}>{c.reason}</td>
-                                            <td style={{ color: 'var(--color-text-secondary)' }}>{c.vet_name || '—'}</td>
-                                            <td style={{ color: 'var(--color-text-secondary)' }}>{c.clinic || '—'}</td>
-                                            <td>{c.cost_brl ? `R$ ${c.cost_brl.toFixed(2)}` : '—'}</td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                                                    <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('consultations', c)}><Edit size={14} /></button>
-                                                    <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('consultations', c.id)} disabled={deleteId === c.id}>{deleteId === c.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {consultations.map((c) => {
+                                        const cTreatments = treatments.filter((t) => t.consultation_id === c.id);
+                                        const isExpanded = expandedConsult === c.id;
+                                        return (
+                                            <>
+                                                <tr key={c.id}>
+                                                    <td style={{ whiteSpace: 'nowrap' }}>{formatDate(c.date)}</td>
+                                                    <td style={{ fontWeight: 600 }}>{c.reason}</td>
+                                                    <td style={{ color: 'var(--color-text-secondary)' }}>{c.vet_name || '—'}</td>
+                                                    <td style={{ color: 'var(--color-text-secondary)' }}>{c.clinic || '—'}</td>
+                                                    <td>{c.cost_brl ? `R$ ${c.cost_brl.toFixed(2)}` : '—'}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-ghost btn-sm"
+                                                            onClick={() => setExpandedConsult(isExpanded ? null : c.id)}
+                                                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+                                                        >
+                                                            <Pill size={13} />
+                                                            {cTreatments.length > 0 && <span className="badge badge-orange" style={{ fontSize: '0.7rem', padding: '1px 5px' }}>{cTreatments.length}</span>}
+                                                            {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                                                            <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('consultations', c)}><Edit size={14} /></button>
+                                                            <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('consultations', c.id)} disabled={deleteId === c.id}>{deleteId === c.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {isExpanded && (
+                                                    <tr key={`${c.id}-treatments`}>
+                                                        <td colSpan={7} style={{ padding: 0, background: 'var(--color-bg-tertiary)' }}>
+                                                            <div style={{ padding: 'var(--space-3) var(--space-4)' }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
+                                                                    <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>💊 Tratamentos Indicados</span>
+                                                                    <button className="btn btn-primary btn-sm" style={{ fontSize: '0.75rem', padding: '3px 10px' }} onClick={() => openTreatmentAdd(c.id)}>
+                                                                        <Plus size={13} /> Tratamento
+                                                                    </button>
+                                                                </div>
+                                                                {cTreatments.length === 0 ? (
+                                                                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.82rem', fontStyle: 'italic' }}>Nenhum tratamento registrado para esta consulta.</p>
+                                                                ) : (
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                                                                        {cTreatments.map((t) => (
+                                                                            <div key={t.id} className="card" style={{ padding: 'var(--space-3)', margin: 0 }}>
+                                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                                    <div style={{ flex: 1 }}>
+                                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: '4px' }}>
+                                                                                            <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.name}</span>
+                                                                                            <span className={`badge ${TREATMENT_STATUS_CLASS[t.status]}`} style={{ fontSize: '0.7rem' }}>{TREATMENT_STATUS_LABELS[t.status]}</span>
+                                                                                        </div>
+                                                                                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2) var(--space-4)' }}>
+                                                                                            <span>{TREATMENT_TYPE_LABELS[t.type]}</span>
+                                                                                            {t.dosage && <span>Dose: {t.dosage}</span>}
+                                                                                            {t.frequency && <span>Freq: {t.frequency}</span>}
+                                                                                            {t.duration && <span>Duração: {t.duration}</span>}
+                                                                                            {t.application_method && <span>Aplicação: {t.application_method}</span>}
+                                                                                            {t.start_date && <span>Início: {formatDate(t.start_date)}</span>}
+                                                                                            {t.end_date && <span>Fim: {formatDate(t.end_date)}</span>}
+                                                                                        </div>
+                                                                                        {t.notes && <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '4px', fontStyle: 'italic' }}>{t.notes}</p>}
+                                                                                    </div>
+                                                                                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                                                        <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openTreatmentEdit(t)}><Edit size={12} /></button>
+                                                                                        <button className="btn btn-danger btn-icon btn-sm" onClick={() => deleteTreatment(t.id)} disabled={deleteId === t.id}>{deleteId === t.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -439,7 +596,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         {limits && !limits.canAddOccurrence ? (
                             <div className="alert alert-warning" style={{ flex: 1 }}>
-                                ⚠️ Limite de ocorrências atingido. <a href="/dashboard/plans" style={{ color: 'var(--color-amber-light)', fontWeight: 600 }}>Fazer upgrade</a>
+                                ⚠️ Limite de ocorrências atingido. <a href="/dashboard/plans" style={{ color: 'var(--color-gold-light)', fontWeight: 600 }}>Fazer upgrade</a>
                             </div>
                         ) : (
                             <button className="btn btn-primary btn-sm" onClick={() => { setEditItem(null); setOccurForm({ type: 'other', date: '', description: '', cost_brl: '', notes: '' }); setShowModal('occurrences'); }}>
@@ -456,7 +613,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 <tbody>
                                     {occurrences.map((o) => (
                                         <tr key={o.id}>
-                                            <td><span className="badge badge-teal">{OCCURRENCE_TYPE_LABELS[o.type] || o.type}</span></td>
+                                            <td><span className="badge badge-orange">{OCCURRENCE_TYPE_LABELS[o.type] || o.type}</span></td>
                                             <td style={{ whiteSpace: 'nowrap' }}>{formatDate(o.date)}</td>
                                             <td style={{ color: 'var(--color-text-secondary)' }}>{o.description || '—'}</td>
                                             <td>{o.cost_brl ? `R$ ${o.cost_brl.toFixed(2)}` : '—'}</td>
@@ -542,7 +699,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                 <td style={{ whiteSpace: 'nowrap' }}>{formatDate(p.date)}</td>
                                                 <td>
                                                     {p.next_due_date ? (
-                                                        <span className={`badge ${isDue ? 'badge-amber' : 'badge-teal'}`}>
+                                                        <span className={`badge ${isDue ? 'badge-gold' : 'badge-orange'}`}>
                                                             {formatDate(p.next_due_date)}
                                                         </span>
                                                     ) : '—'}
@@ -590,7 +747,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                 {formatDate(m.start_date)} até {m.end_date ? formatDate(m.end_date) : 'Contínuo'}
                                             </td>
                                             <td>
-                                                <span className={`badge ${m.active ? 'badge-teal' : 'badge-gray'}`}>
+                                                <span className={`badge ${m.active ? 'badge-orange' : 'badge-gray'}`}>
                                                     {m.active ? 'Ativo' : 'Inativo'}
                                                 </span>
                                             </td>
@@ -680,7 +837,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                             {/* AI upload tip */}
                             <div className="alert alert-info" style={{ fontSize: '0.82rem', padding: 'var(--space-2) var(--space-3)' }}>
-                                <Sparkles size={14} style={{ color: 'var(--color-teal)', flexShrink: 0 }} />
+                                <Sparkles size={14} style={{ color: 'var(--color-orange)', flexShrink: 0 }} />
                                 <span>Faça upload de uma receita veterinária e clique em <strong>Preencher com IA</strong> para preencher os campos automaticamente.</span>
                             </div>
                             {/* Document upload with AI */}
@@ -907,6 +1064,87 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
                             <button className="btn btn-primary" onClick={saveMedication} disabled={loading || !medForm.start_date || !medForm.medication_name || !medForm.dosage}>
+                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── TREATMENT MODAL ─── */}
+            {showModal === 'treatment' && (
+                <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeTreatmentModal()}>
+                    <div className="modal">
+                        <div className="modal-header">
+                            <h2 className="modal-title">{editItem ? 'Editar Tratamento' : 'Novo Tratamento'}</h2>
+                            <button className="btn btn-ghost btn-icon" onClick={closeTreatmentModal}><X size={18} /></button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                            <div className="form-grid">
+                                <div className="form-group form-full">
+                                    <label className="form-label">Nome do tratamento *</label>
+                                    <input className="form-input" placeholder="Ex: Amoxicilina 250mg, Fisioterapia..." value={treatForm.name} onChange={(e) => setTreatForm((p) => ({ ...p, name: e.target.value }))} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Tipo *</label>
+                                    <select className="form-select" value={treatForm.type} onChange={(e) => setTreatForm((p) => ({ ...p, type: e.target.value as TreatmentType }))}>
+                                        {Object.entries(TREATMENT_TYPE_LABELS).map(([val, label]) => (
+                                            <option key={val} value={val}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Status</label>
+                                    <select className="form-select" value={treatForm.status} onChange={(e) => setTreatForm((p) => ({ ...p, status: e.target.value as TreatmentStatus }))}>
+                                        {Object.entries(TREATMENT_STATUS_LABELS).map(([val, label]) => (
+                                            <option key={val} value={val}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Dosagem</label>
+                                    <input className="form-input" placeholder="Ex: 1 comprimido, 5ml..." value={treatForm.dosage} onChange={(e) => setTreatForm((p) => ({ ...p, dosage: e.target.value }))} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Frequência</label>
+                                    <input className="form-input" placeholder="Ex: 2x ao dia, semanal..." value={treatForm.frequency} onChange={(e) => setTreatForm((p) => ({ ...p, frequency: e.target.value }))} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Duração</label>
+                                    <input className="form-input" placeholder="Ex: 7 dias, 2 semanas..." value={treatForm.duration} onChange={(e) => setTreatForm((p) => ({ ...p, duration: e.target.value }))} />
+                                </div>
+                                <div className="form-group form-full">
+                                    <label className="form-label">Modo de Aplicação</label>
+                                    <select className="form-select" value={treatForm.application_method} onChange={(e) => setTreatForm((p) => ({ ...p, application_method: e.target.value }))}>
+                                        <option value="">Selecione...</option>
+                                        <option value="oral">Via Oral</option>
+                                        <option value="topical">Tópico (Pele)</option>
+                                        <option value="injectable">Injetável</option>
+                                        <option value="inhalation">Inalação</option>
+                                        <option value="eye_drops">Colírio (Ocular)</option>
+                                        <option value="ear_drops">Otológico (Ouvido)</option>
+                                        <option value="rectal">Retal</option>
+                                        <option value="transdermal">Transdérmico</option>
+                                        <option value="other">Outro</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Data de início</label>
+                                    <input type="date" className="form-input" value={treatForm.start_date} onChange={(e) => setTreatForm((p) => ({ ...p, start_date: e.target.value }))} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Data de término</label>
+                                    <input type="date" className="form-input" value={treatForm.end_date} onChange={(e) => setTreatForm((p) => ({ ...p, end_date: e.target.value }))} />
+                                </div>
+                                <div className="form-group form-full">
+                                    <label className="form-label">Observações</label>
+                                    <textarea className="form-textarea" rows={2} value={treatForm.notes} onChange={(e) => setTreatForm((p) => ({ ...p, notes: e.target.value }))} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={closeTreatmentModal}>Cancelar</button>
+                            <button className="btn btn-primary" onClick={saveTreatment} disabled={loading || !treatForm.name}>
                                 {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
                             </button>
                         </div>

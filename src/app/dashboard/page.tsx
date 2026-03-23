@@ -163,11 +163,11 @@ export default async function DashboardPage() {
 
     // Agregação por Tipo
     const expensesByType: Record<string, { label: string; total: number; color: string }> = {
-        vet: { label: 'Consulta Vet.', total: 0, color: 'var(--color-teal)' },
-        food_purchase: { label: 'Alimentação', total: 0, color: 'var(--color-amber)' },
-        grooming: { label: 'Tosa', total: 0, color: 'var(--color-purple)' },
-        bath: { label: 'Banho', total: 0, color: 'var(--color-teal-light)' },
-        medication: { label: 'Medicamento', total: 0, color: 'var(--color-red)' },
+        vet: { label: 'Consulta Vet.', total: 0, color: 'var(--color-orange)' },
+        food_purchase: { label: 'Alimentação', total: 0, color: 'var(--color-gold)' },
+        grooming: { label: 'Tosa', total: 0, color: 'var(--color-primary)' },
+        bath: { label: 'Banho', total: 0, color: 'var(--color-orange-light)' },
+        medication: { label: 'Medicamento', total: 0, color: 'var(--color-danger)' },
         other: { label: 'Outros', total: 0, color: 'var(--color-text-muted)' },
     };
 
@@ -235,7 +235,7 @@ export default async function DashboardPage() {
             {canSeeAlerts(plan) && smartAlerts.length > 0 && (
                 <div className="alerts-section">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
-                        <Bell size={16} style={{ color: 'var(--color-amber-light)' }} />
+                        <Bell size={16} style={{ color: 'var(--color-gold-light)' }} />
                         <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alertas de Saúde</span>
                     </div>
                     {smartAlerts.map((alert, i) => (
@@ -266,7 +266,7 @@ export default async function DashboardPage() {
             {/* Stats */}
             <div className="stats-grid">
                 <div className="stat-card">
-                    <div className="stat-icon stat-icon-teal">
+                    <div className="stat-icon stat-icon-orange">
                         <PawPrint size={22} />
                     </div>
                     <div>
@@ -275,7 +275,7 @@ export default async function DashboardPage() {
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon stat-icon-amber">
+                    <div className="stat-icon stat-icon-gold">
                         <Syringe size={22} />
                     </div>
                     <div>
@@ -284,7 +284,7 @@ export default async function DashboardPage() {
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon stat-icon-purple">
+                    <div className="stat-icon stat-icon-primary">
                         <AlertCircle size={22} />
                     </div>
                     <div>
@@ -333,7 +333,7 @@ export default async function DashboardPage() {
                 <div className="card">
                     <div className="card-header">
                         <h2 className="card-title">Vacinas Próximas</h2>
-                        <Syringe size={18} style={{ color: 'var(--color-amber-light)' }} />
+                        <Syringe size={18} style={{ color: 'var(--color-gold-light)' }} />
                     </div>
                     {upcomingVaccinations.length === 0 && upcomingParasites.length === 0 ? (
                         <div className="empty-state" style={{ padding: 'var(--space-6) 0' }}>
@@ -354,7 +354,7 @@ export default async function DashboardPage() {
                                             <div className="vacc-name">{v.vaccine_name}</div>
                                             <div className="vacc-pet">{(v.pets as any)?.name}</div>
                                         </div>
-                                        <span className={`badge ${daysLeft <= 7 ? 'badge-red' : 'badge-amber'}`}>
+                                        <span className={`badge ${daysLeft <= 7 ? 'badge-danger' : 'badge-gold'}`}>
                                             {daysLeft === 0 ? 'Hoje' : `${daysLeft}d`}
                                         </span>
                                     </div>
@@ -375,7 +375,7 @@ export default async function DashboardPage() {
                                             </div>
                                             <div className="vacc-pet">{(p.pets as any)?.name} - {p.medication_name}</div>
                                         </div>
-                                        <span className={`badge ${daysLeft <= 7 ? 'badge-red' : 'badge-amber'}`}>
+                                        <span className={`badge ${daysLeft <= 7 ? 'badge-danger' : 'badge-gold'}`}>
                                             {daysLeft === 0 ? 'Hoje' : `${daysLeft}d`}
                                         </span>
                                     </div>
@@ -390,7 +390,7 @@ export default async function DashboardPage() {
                     <div className="card" style={{ gridColumn: '1 / -1' }}>
                         <div className="card-header">
                             <h2 className="card-title">Tratamentos Ativos</h2>
-                            <Pill size={18} style={{ color: 'var(--color-teal)' }} />
+                            <Pill size={18} style={{ color: 'var(--color-orange)' }} />
                         </div>
                         <div className="table-container">
                             <table>
@@ -490,7 +490,7 @@ export default async function DashboardPage() {
                                                     <span className="expense-value">{formatCurrency(item.total)}</span>
                                                 </div>
                                                 <div className="progress-bg">
-                                                    <div className="progress-fill" style={{ width: `${percent}%`, background: 'var(--color-teal)' }}></div>
+                                                    <div className="progress-fill" style={{ width: `${percent}%`, background: 'var(--color-orange)' }}></div>
                                                 </div>
                                             </div>
                                         );
@@ -502,7 +502,7 @@ export default async function DashboardPage() {
                             <div className="card">
                                 <div className="card-header">
                                     <h3 className="card-title" style={{ fontSize: '1rem' }}>Gastos por Categoria</h3>
-                                    <Activity size={18} style={{ color: 'var(--color-teal)' }} />
+                                    <Activity size={18} style={{ color: 'var(--color-orange)' }} />
                                 </div>
                                 <div className="expense-bars">
                                     {typeExpensesList.map((item, idx) => {
@@ -574,7 +574,7 @@ export default async function DashboardPage() {
           transition: all var(--transition-fast);
         }
         .pet-mini-card:hover {
-          border-color: var(--color-teal);
+          border-color: var(--color-orange);
           background: rgba(13, 148, 136, 0.08);
         }
         .pet-mini-avatar {

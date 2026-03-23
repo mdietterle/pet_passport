@@ -98,7 +98,7 @@ export default function PetPassportPrint({ pet, vaccinations, consultations, par
                 {/* Header */}
                 <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    paddingBottom: '20px', borderBottom: '3px solid #FF9300', marginBottom: '28px',
+                    paddingBottom: '20px', borderBottom: '3px solid #EA580C', marginBottom: '28px',
                 }}>
                     <div>
                         <div style={{ fontSize: '13px', color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
@@ -114,7 +114,7 @@ export default function PetPassportPrint({ pet, vaccinations, consultations, par
                             src={pet.photo_url}
                             alt={pet.name}
                             crossOrigin="anonymous"
-                            style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: '50%', border: '3px solid #FF9300' }}
+                            style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: '50%', border: '3px solid #EA580C' }}
                         />
                     )}
                 </div>
@@ -183,8 +183,8 @@ export default function PetPassportPrint({ pet, vaccinations, consultations, par
 
                 {/* Notes */}
                 {pet.notes && (
-                    <div style={{ background: '#FFF8F0', border: '1px solid #FFD580', borderRadius: '8px', padding: '14px 16px', marginBottom: '24px' }}>
-                        <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#CC7600', marginBottom: '6px' }}>
+                    <div style={{ background: '#FFF8F0', border: '1px solid #FDBA74', borderRadius: '8px', padding: '14px 16px', marginBottom: '24px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#C2410C', marginBottom: '6px' }}>
                             ⚕️ Observações Médicas
                         </div>
                         <div style={{ fontSize: '13px', lineHeight: 1.6 }}>{pet.notes}</div>

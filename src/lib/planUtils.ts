@@ -8,9 +8,9 @@
 
 export const PLAN_COLORS: Record<string, string> = {
     free: 'var(--color-gray)',
-    basic: 'var(--color-teal)',
-    pro: 'var(--color-amber-dark)',
-    premium: 'var(--color-purple)',
+    basic: 'var(--color-orange)',
+    pro: 'var(--color-gold-dark)',
+    premium: 'var(--color-primary)',
 };
 
 export const PLAN_ICONS: Record<string, string> = {

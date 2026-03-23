@@ -32,15 +32,17 @@ export default async function PetReportPage({ params }: { params: { id: string }
     const ownerName = (profile as any)?.full_name || user.email || 'Tutor';
 
     // Fetch all pet records in parallel
-    const [{ data: vaccinationsData }, { data: consultationsData }, { data: occurrencesData }] = await Promise.all([
+    const [{ data: vaccinationsData }, { data: consultationsData }, { data: occurrencesData }, { data: treatmentsData }] = await Promise.all([
         (supabase.from('vaccinations') as any).select('*').eq('pet_id', pet.id).order('date', { ascending: false }),
         (supabase.from('vet_consultations') as any).select('*').eq('pet_id', pet.id).order('date', { ascending: false }),
         (supabase.from('occurrences') as any).select('*').eq('pet_id', pet.id).order('date', { ascending: false }),
+        (supabase.from('treatments') as any).select('*').eq('pet_id', pet.id).order('created_at', { ascending: false }),
     ]);
 
     const vaccinations = vaccinationsData as any[] | null;
     const consultations = consultationsData as any[] | null;
     const occurrences = occurrencesData as any[] | null;
+    const treatments = treatmentsData as any[] | null;
 
     // Fetch documents using service role to avoid potential RLS issues
     const serviceClient = createServiceClient(
@@ -73,6 +75,7 @@ export default async function PetReportPage({ params }: { params: { id: string }
                 vaccinations={vaccinations || []}
                 consultations={consultations || []}
                 occurrences={occurrences || []}
+                treatments={treatments || []}
                 documents={documents || []}
                 generatedAt={generatedAt}
             />

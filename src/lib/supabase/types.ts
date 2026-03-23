@@ -54,6 +54,11 @@ export interface Database {
                 Insert: Omit<Medication, 'id' | 'created_at'>;
                 Update: Partial<Omit<Medication, 'id' | 'created_at'>>;
             };
+            treatments: {
+                Row: Treatment;
+                Insert: Omit<Treatment, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<Treatment, 'id' | 'created_at'>>;
+            };
         };
         Views: {
             pet_record_counts: {
@@ -211,6 +216,27 @@ export interface Medication {
     active: boolean;
     notes: string | null;
     created_at: string;
+}
+
+export type TreatmentType = 'medication' | 'therapy' | 'surgery' | 'procedure' | 'other';
+export type TreatmentStatus = 'active' | 'completed' | 'cancelled';
+
+export interface Treatment {
+    id: string;
+    consultation_id: string;
+    pet_id: string;
+    name: string;
+    type: TreatmentType;
+    dosage: string | null;
+    frequency: string | null;
+    duration: string | null;
+    application_method: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    status: TreatmentStatus;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface ExamAttachment {

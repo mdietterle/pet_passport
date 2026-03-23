@@ -171,7 +171,7 @@ export default function TopBar() {
 
                             {alerts.length === 0 ? (
                                 <div className="topbar-notif-empty">
-                                    <CheckCircle size={28} style={{ color: 'var(--color-green)' }} />
+                                    <CheckCircle size={28} style={{ color: 'var(--color-success)' }} />
                                     <span>Nenhuma notificação</span>
                                 </div>
                             ) : (

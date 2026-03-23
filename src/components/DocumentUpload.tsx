@@ -124,10 +124,10 @@ export default function DocumentUpload({ petId, mode, existingDocs = [], onDone,
                     onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
                 >
                     {uploading ? (
-                        <><Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-teal)' }} />
+                        <><Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-orange)' }} />
                             <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>Enviando...</span></>
                     ) : (
-                        <><Upload size={22} style={{ color: 'var(--color-teal)' }} />
+                        <><Upload size={22} style={{ color: 'var(--color-orange)' }} />
                             <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
                                 Clique ou arraste fotos/PDF aqui
                             </span>
@@ -228,7 +228,7 @@ export default function DocumentUpload({ petId, mode, existingDocs = [], onDone,
           text-align: center;
         }
         .upload-zone:hover, .upload-zone-active {
-          border-color: var(--color-teal);
+          border-color: var(--color-orange);
           background: rgba(13,148,136,0.05);
         }
         .doc-row {

@@ -31,7 +31,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
       <div className="page-header" style={{ textAlign: 'center' }}>
         <h1 className="page-title">Escolha seu Plano</h1>
         <p className="page-subtitle">
-          Plano atual: <strong style={{ color: 'var(--color-teal-light)' }}>{currentPlan?.display_name || 'Gratuito'}</strong>
+          Plano atual: <strong style={{ color: 'var(--color-orange-light)' }}>{currentPlan?.display_name || 'Gratuito'}</strong>
         </p>
         
         {searchParams.stripe_success === 'true' && (
@@ -146,11 +146,11 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
           box-shadow: var(--shadow-lg);
         }
         .plan-card-current {
-          border-color: var(--color-teal);
-          box-shadow: 0 0 24px var(--color-teal-glow);
+          border-color: var(--color-orange);
+          box-shadow: 0 0 24px var(--color-orange-glow);
         }
         .plan-card-featured {
-          border-color: var(--color-amber);
+          border-color: var(--color-gold);
           background: linear-gradient(180deg, rgba(245,158,11,0.05) 0%, var(--color-bg-secondary) 100%);
         }
         .plan-badge-popular {
@@ -158,7 +158,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
           top: -12px;
           left: 50%;
           transform: translateX(-50%);
-          background: linear-gradient(135deg, var(--color-amber-dark), var(--color-amber));
+          background: linear-gradient(135deg, var(--color-gold-dark), var(--color-gold));
           color: #000;
           font-size: 0.75rem;
           font-weight: 700;
@@ -173,7 +173,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
           position: absolute;
           top: -12px;
           right: var(--space-4);
-          background: var(--color-teal);
+          background: var(--color-orange);
           color: white;
           font-size: 0.7rem;
           font-weight: 700;
@@ -224,7 +224,7 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
           color: var(--color-text-secondary);
         }
         .plan-feature-check {
-          color: var(--color-teal-light);
+          color: var(--color-orange-light);
           flex-shrink: 0;
         }
         .plan-cta { margin-top: auto; }

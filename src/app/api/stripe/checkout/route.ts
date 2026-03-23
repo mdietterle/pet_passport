@@ -5,9 +5,10 @@ import Stripe from 'stripe';
 export async function POST(request: NextRequest) {
     try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            console.error('Auth error in checkout:', authError);
+            return NextResponse.json({ error: 'Unauthorized', details: authError?.message }, { status: 401 });
         }
 
         const formData = await request.formData();
@@ -18,15 +19,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
         }
 
-        // Fetch user profile
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('full_name, tax_id, cellphone')
             .eq('id', user.id)
             .single();
 
-        if (!profile) {
-            return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+        if (profileError || !profile) {
+            console.error('Profile not found for user:', user.id, profileError);
+            return NextResponse.json({ error: 'User profile not found', details: profileError?.message }, { status: 404 });
         }
 
         // Fetch plan details from database
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
             mode: 'payment',
             success_url: `${domainURL}/dashboard/plans?stripe_success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${domainURL}/dashboard/plans?stripe_canceled=true`,
-            customer_email: user.email,
+            customer_email: user.email || undefined,
             client_reference_id: user.id, // Good practice
             metadata: {
                 supabase_user_id: user.id,
@@ -97,8 +98,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to create checkout session URL' }, { status: 500 });
         }
 
-    } catch (error) {
-        console.error('Stripe Checkout error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        } catch (error: any) {
+        console.error('Stripe Checkout error detail:', {
+            message: error.message,
+            stack: error.stack,
+            type: error.type,
+            code: error.code,
+            raw: error
+        });
+        return NextResponse.json({ 
+            error: 'Internal server error', 
+            details: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }

@@ -17,7 +17,7 @@ export default function AdminSidebar() {
     return (
         <aside className="sidebar">
             <div className="sidebar-logo">
-                <div className="sidebar-logo-icon" style={{ background: 'linear-gradient(135deg, var(--color-teal), var(--color-teal-dark))' }}>
+                <div className="sidebar-logo-icon" style={{ background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))' }}>
                     <ShieldCheck size={18} />
                 </div>
                 <span className="sidebar-logo-text">Admin</span>

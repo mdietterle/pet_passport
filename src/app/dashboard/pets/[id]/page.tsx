@@ -7,6 +7,7 @@ import { petAge, formatDate } from '@/lib/dateUtils';
 import PetTabs from '@/components/pets/PetTabs';
 import PetQRCode from '@/components/pets/PetQRCode';
 import PetPassportPrint from '@/components/pets/PetPassportPrint';
+import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
 import { canExportPDF, canUseQRCode } from '@/lib/planFeatures';
 
 const SPECIES_EMOJI: Record<string, string> = {
@@ -47,6 +48,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
     { data: parasites },
     { data: medications },
     { data: examAttachments },
+    { data: treatments },
   ] = await Promise.all([
     supabase.from('vaccinations').select('*').eq('pet_id', pet.id).order('date', { ascending: false }) as any,
     supabase.from('vet_consultations').select('*').eq('pet_id', pet.id).order('date', { ascending: false }) as any,
@@ -55,6 +57,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
     supabase.from('parasite_controls').select('*').eq('pet_id', pet.id).order('date', { ascending: false }) as any,
     supabase.from('medications').select('*').eq('pet_id', pet.id).order('start_date', { ascending: false }) as any,
     supabase.from('exam_attachments').select('*').eq('pet_id', pet.id).order('uploaded_at', { ascending: false }) as any,
+    supabase.from('treatments').select('*').eq('pet_id', pet.id).order('created_at', { ascending: false }) as any,
   ]);
 
   const plan = (profile as any)?.plans;
@@ -111,6 +114,9 @@ export default async function PetDetailPage({ params }: { params: { id: string }
         </div>
       </div>
 
+      {/* RG Animal Banner */}
+      <RGAnimalBanner />
+
       {/* Tabs with records */}
       <PetTabs
         pet={pet}
@@ -121,6 +127,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
         parasites={parasites || []}
         medications={medications || []}
         examAttachments={examAttachments || []}
+        treatments={treatments || []}
         plan={plan}
       />
 

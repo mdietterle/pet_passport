@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { SPECIES_LABELS, SEX_LABELS } from '@/lib/planLimits';
+import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
 
 export default function NewPetPage() {
     const router = useRouter();
@@ -138,6 +139,10 @@ export default function NewPetPage() {
                         </button>
                     </div>
                 </form>
+            </div>
+            
+            <div style={{ maxWidth: 640, marginTop: 'var(--space-4)' }}>
+                <RGAnimalBanner />
             </div>
         </div>
     );

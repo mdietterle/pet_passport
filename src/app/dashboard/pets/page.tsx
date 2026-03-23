@@ -126,8 +126,8 @@ export default async function PetsPage() {
           cursor: pointer;
         }
         .pet-card:hover {
-          border-color: var(--color-teal);
-          box-shadow: 0 0 20px var(--color-teal-glow);
+          border-color: var(--color-orange);
+          box-shadow: 0 0 20px var(--color-orange-glow);
           transform: translateY(-3px);
         }
         .pet-card-avatar {
@@ -186,8 +186,8 @@ export default async function PetsPage() {
           font-size: 0.9rem;
         }
         .pet-card-add:hover {
-          color: var(--color-teal-light);
-          border-color: var(--color-teal);
+          color: var(--color-orange-light);
+          border-color: var(--color-orange);
           background: rgba(13, 148, 136, 0.05);
         }
       `}</style>

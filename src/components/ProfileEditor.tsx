@@ -347,7 +347,7 @@ export default function ProfileEditor({ userId, initialName, initialAvatarUrl, i
                     height: 88px;
                     border-radius: var(--radius-full);
                     flex-shrink: 0;
-                    background: linear-gradient(135deg, var(--color-teal), var(--color-teal-dark));
+                    background: linear-gradient(135deg, var(--color-orange), var(--color-orange-dark));
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -400,7 +400,7 @@ export default function ProfileEditor({ userId, initialName, initialAvatarUrl, i
                 }
                 .profile-avatar-error {
                     font-size: 0.8rem;
-                    color: var(--color-red);
+                    color: var(--color-danger);
                 }
                 .profile-field-row {
                     display: flex;

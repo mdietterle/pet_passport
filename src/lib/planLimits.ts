@@ -56,11 +56,11 @@ export function getPlanBadgeColor(planName: string): string {
         case 'free':
             return 'var(--color-gray)';
         case 'basic':
-            return 'var(--color-teal)';
+            return 'var(--color-orange)';
         case 'pro':
-            return 'var(--color-amber)';
+            return 'var(--color-gold)';
         case 'premium':
-            return 'var(--color-purple)';
+            return 'var(--color-primary)';
         default:
             return 'var(--color-gray)';
     }

@@ -7,6 +7,7 @@ import { formatDate } from '@/lib/dateUtils';
 interface Doc { file_url: string; file_name: string; file_type: string; reference_id: string | null; reference_type: string; }
 interface Vaccination { id: string; vaccine_name: string; date: string; next_due_date?: string; vet_name?: string; clinic?: string; batch?: string; manufacturer?: string; notes?: string; }
 interface Consultation { id: string; date: string; reason: string; vet_name?: string; clinic?: string; diagnosis?: string; prescription?: string; cost_brl?: number; follow_up_date?: string; notes?: string; }
+interface ReportTreatment { id: string; consultation_id: string; name: string; type: string; dosage?: string; frequency?: string; duration?: string; application_method?: string; start_date?: string; end_date?: string; status: string; notes?: string; }
 interface Occurrence { id: string; type: string; date: string; description?: string; notes?: string; cost_brl?: number; }
 interface Pet { name: string; species: string; breed?: string; birth_date?: string; sex?: string; weight_kg?: number; color?: string; microchip?: string; notes?: string; }
 
@@ -16,6 +17,7 @@ interface Props {
     vaccinations: Vaccination[];
     consultations: Consultation[];
     occurrences: Occurrence[];
+    treatments: ReportTreatment[];
     documents: Doc[];
     generatedAt: string;
 }
@@ -28,7 +30,7 @@ function docsFor(documents: Doc[], refId: string) {
     return documents.filter((d) => d.reference_id === refId && d.file_type?.startsWith('image/'));
 }
 
-export default function PetReport({ pet, ownerName, vaccinations, consultations, occurrences, documents, generatedAt }: Props) {
+export default function PetReport({ pet, ownerName, vaccinations, consultations, occurrences, treatments, documents, generatedAt }: Props) {
     const reportRef = useRef<HTMLDivElement>(null);
 
     function handlePrint() {
@@ -146,6 +148,42 @@ export default function PetReport({ pet, ownerName, vaccinations, consultations,
                                         </div>
                                     )}
                                     {c.notes && <p className="rpt-notes">Obs: {c.notes}</p>}
+                                    {/* Treatments linked to this consultation */}
+                                    {(() => {
+                                        const cTreats = treatments.filter((t) => t.consultation_id === c.id);
+                                        if (cTreats.length === 0) return null;
+                                        return (
+                                            <div className="rpt-text-block" style={{ marginTop: '10px' }}>
+                                                <span className="rpt-label">💊 Tratamentos Indicados</span>
+                                                <div style={{ marginTop: '4px' }}>
+                                                    {cTreats.map((t) => (
+                                                        <div key={t.id} style={{ padding: '6px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                <strong>{t.name}</strong>
+                                                                <span style={{
+                                                                    fontSize: '0.7rem',
+                                                                    padding: '1px 6px',
+                                                                    borderRadius: '4px',
+                                                                    background: t.status === 'active' ? '#ECFDF5' : t.status === 'completed' ? '#F3F4F6' : '#FEF3C7',
+                                                                    color: t.status === 'active' ? '#059669' : t.status === 'completed' ? '#6B7280' : '#D97706',
+                                                                    fontWeight: 600,
+                                                                }}>{t.status === 'active' ? 'Ativo' : t.status === 'completed' ? 'Concluído' : 'Cancelado'}</span>
+                                                            </div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#666', display: 'flex', flexWrap: 'wrap', gap: '6px 12px', marginTop: '2px' }}>
+                                                                {t.dosage && <span>Dose: {t.dosage}</span>}
+                                                                {t.frequency && <span>Freq: {t.frequency}</span>}
+                                                                {t.duration && <span>Duração: {t.duration}</span>}
+                                                                {t.application_method && <span>Aplicação: {t.application_method}</span>}
+                                                                {t.start_date && <span>Início: {formatDate(t.start_date)}</span>}
+                                                                {t.end_date && <span>Fim: {formatDate(t.end_date)}</span>}
+                                                            </div>
+                                                            {t.notes && <p style={{ fontSize: '0.78rem', color: '#888', marginTop: '2px', fontStyle: 'italic' }}>{t.notes}</p>}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                     {imgs.length > 0 && (
                                         <div className="rpt-img-row">
                                             {imgs.map((img, i) => (

@@ -91,7 +91,7 @@ export default function UsersTable({ users: initUsers, plans }: Props) {
                                 </button>
                             </td>
                             <td>
-                                <span className={`badge ${u.subscription_status === 'active' ? 'badge-teal' : 'badge-amber'}`}>
+                                <span className={`badge ${u.subscription_status === 'active' ? 'badge-orange' : 'badge-gold'}`}>
                                     {u.subscription_status || 'free'}
                                 </span>
                             </td>

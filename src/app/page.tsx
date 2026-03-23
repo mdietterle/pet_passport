@@ -96,7 +96,7 @@ export default function LandingPage() {
         .landing-logo-icon {
           width: 36px;
           height: 36px;
-          background: linear-gradient(135deg, var(--color-teal), var(--color-teal-dark));
+          background: linear-gradient(135deg, var(--color-orange), var(--color-orange-dark));
           border-radius: var(--radius-sm);
           display: flex;
           align-items: center;
@@ -106,7 +106,7 @@ export default function LandingPage() {
         .landing-logo-text {
           font-size: 1.1rem;
           font-weight: 700;
-          background: linear-gradient(135deg, var(--color-teal-light), white);
+          background: linear-gradient(135deg, var(--color-orange-light), white);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -132,7 +132,7 @@ export default function LandingPage() {
           gap: var(--space-2);
           background: rgba(13, 148, 136, 0.1);
           border: 1px solid rgba(13, 148, 136, 0.3);
-          color: var(--color-teal-light);
+          color: var(--color-orange-light);
           padding: 6px 16px;
           border-radius: var(--radius-full);
           font-size: 0.85rem;
@@ -145,7 +145,7 @@ export default function LandingPage() {
           letter-spacing: -0.02em;
         }
         .hero-title-accent {
-          background: linear-gradient(135deg, var(--color-teal-light), var(--color-amber));
+          background: linear-gradient(135deg, var(--color-orange-light), var(--color-gold));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -179,9 +179,9 @@ export default function LandingPage() {
           transition: all var(--transition-base);
         }
         .feature-card:hover {
-          border-color: var(--color-teal);
+          border-color: var(--color-orange);
           transform: translateY(-4px);
-          box-shadow: 0 8px 32px var(--color-teal-glow);
+          box-shadow: 0 8px 32px var(--color-orange-glow);
         }
         .feature-icon {
           font-size: 2rem;

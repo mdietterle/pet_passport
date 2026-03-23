@@ -55,7 +55,7 @@ export default function PetQRCode({ petId, qrToken, petName, publicEnabled }: Pe
         <div className="qr-card">
             <div className="qr-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <QrCode size={20} style={{ color: 'var(--color-teal)' }} />
+                    <QrCode size={20} style={{ color: 'var(--color-orange)' }} />
                     <span className="card-title">QR Code & Perfil Público</span>
                 </div>
                 <button

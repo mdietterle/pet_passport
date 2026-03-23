@@ -68,7 +68,7 @@ export default async function PublicPetPage({ params }: { params: { token: strin
         }}>
             {/* Header */}
             <div style={{
-                background: 'linear-gradient(135deg, #FF9300, #CC7600)',
+                background: 'linear-gradient(135deg, #EA580C, #C2410C)',
                 padding: '1.5rem 1rem',
                 textAlign: 'center',
                 color: 'white',
@@ -95,7 +95,7 @@ export default async function PublicPetPage({ params }: { params: { token: strin
                                 width: '120px', height: '120px',
                                 borderRadius: '50%',
                                 objectFit: 'cover',
-                                border: '4px solid #FF9300',
+                                border: '4px solid #EA580C',
                                 marginBottom: '1rem',
                             }}
                         />
@@ -105,7 +105,7 @@ export default async function PublicPetPage({ params }: { params: { token: strin
                             background: 'linear-gradient(135deg, #FFF4E6, #FFE0B2)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: '3.5rem', margin: '0 auto 1rem',
-                            border: '4px solid #FF9300',
+                            border: '4px solid #EA580C',
                         }}>
                             {SPECIES_EMOJI[pet.species] || '🐾'}
                         </div>
@@ -142,7 +142,7 @@ export default async function PublicPetPage({ params }: { params: { token: strin
                 {/* Emergency Contact */}
                 {pet.emergency_contact && (
                     <div style={{
-                        background: 'linear-gradient(135deg, #FF9300, #CC7600)',
+                        background: 'linear-gradient(135deg, #EA580C, #C2410C)',
                         borderRadius: '16px',
                         padding: '1.25rem 1.5rem',
                         color: 'white',
@@ -163,7 +163,7 @@ export default async function PublicPetPage({ params }: { params: { token: strin
                         padding: '1.25rem 1.5rem',
                         boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
                         marginBottom: '1.25rem',
-                        borderLeft: '4px solid #F8F246',
+                        borderLeft: '4px solid #D97706',
                     }}>
                         <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             ⚕️ Necessidades Médicas
