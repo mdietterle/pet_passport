@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Plus, PawPrint } from 'lucide-react';
+import { Plus, Lock } from 'lucide-react';
 import { petAge } from '@/lib/dateUtils';
+import { getEditablePetIds } from '@/lib/planLimits';
 
 const SPECIES_EMOJI: Record<string, string> = {
     dog: '🐶', cat: '🐱', bird: '🐦', rabbit: '🐰', fish: '🐟', reptile: '🦎', other: '🐾',
@@ -21,12 +22,13 @@ export default async function PetsPage() {
         .eq('id', user.id)
         .single();
 
+    // Order by created_at ASC so the first registered pet stays editable on downgrade
     const { data: petsRaw } = await supabase
         .from('pets')
         .select('*')
         .eq('owner_id', user.id)
         .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
 
     const pets = petsRaw as any[] | null;
 
@@ -34,6 +36,7 @@ export default async function PetsPage() {
     const petCount = pets?.length || 0;
     // If plan is null (plan_id not set yet), allow adding pets
     const canAddPet = !plan || plan.max_pets === null || petCount < plan.max_pets;
+    const editableIds = getEditablePetIds(plan, pets || []);
 
     return (
         <div className="page-container">
@@ -69,31 +72,39 @@ export default async function PetsPage() {
                 </div>
             ) : (
                 <div className="pets-grid">
-                    {(pets || []).map((pet) => (
-                        <Link key={pet.id} href={`/dashboard/pets/${pet.id}`} className="pet-card">
-                            <div className="pet-card-avatar">
-                                {(pet as any).photo_url
-                                    ? <img src={(pet as any).photo_url} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                                    : SPECIES_EMOJI[pet.species] || '🐾'}
-                            </div>
-                            <div className="pet-card-body">
-                                <h3 className="pet-card-name">{pet.name}</h3>
-                                <p className="pet-card-breed">{pet.breed || pet.species}</p>
-                                <div className="pet-card-meta">
-                                    <span className="pet-card-age">{petAge(pet.birth_date)}</span>
-                                    {pet.sex && (
-                                        <span className="pet-card-sex">
-                                            {pet.sex === 'male' ? '♂ Macho' : pet.sex === 'female' ? '♀ Fêmea' : ''}
-                                        </span>
+                    {(pets || []).map((pet) => {
+                        const isReadOnly = !editableIds.has(pet.id);
+                        return (
+                            <Link key={pet.id} href={`/dashboard/pets/${pet.id}`} className={`pet-card ${isReadOnly ? 'pet-card-readonly' : ''}`}>
+                                {isReadOnly && (
+                                    <div className="pet-card-lock">
+                                        <Lock size={14} /> Somente leitura
+                                    </div>
+                                )}
+                                <div className="pet-card-avatar">
+                                    {(pet as any).photo_url
+                                        ? <img src={(pet as any).photo_url} alt={pet.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                        : SPECIES_EMOJI[pet.species] || '🐾'}
+                                </div>
+                                <div className="pet-card-body">
+                                    <h3 className="pet-card-name">{pet.name}</h3>
+                                    <p className="pet-card-breed">{pet.breed || pet.species}</p>
+                                    <div className="pet-card-meta">
+                                        <span className="pet-card-age">{petAge(pet.birth_date)}</span>
+                                        {pet.sex && (
+                                            <span className="pet-card-sex">
+                                                {pet.sex === 'male' ? '♂ Macho' : pet.sex === 'female' ? '♀ Fêmea' : ''}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {pet.weight_kg && (
+                                        <p className="pet-card-weight">{pet.weight_kg} kg</p>
                                     )}
                                 </div>
-                                {pet.weight_kg && (
-                                    <p className="pet-card-weight">{pet.weight_kg} kg</p>
-                                )}
-                            </div>
-                            <div className="pet-card-arrow">→</div>
-                        </Link>
-                    ))}
+                                <div className="pet-card-arrow">→</div>
+                            </Link>
+                        );
+                    })}
 
                     {/* Add pet card */}
                     {canAddPet && (
@@ -189,6 +200,29 @@ export default async function PetsPage() {
           color: var(--color-orange-light);
           border-color: var(--color-orange);
           background: rgba(13, 148, 136, 0.05);
+        }
+        .pet-card-readonly {
+          opacity: 0.65;
+          border-style: dashed;
+        }
+        .pet-card-readonly:hover {
+          border-color: var(--color-border);
+          box-shadow: none;
+          transform: none;
+        }
+        .pet-card-lock {
+          position: absolute;
+          top: var(--space-2);
+          right: var(--space-2);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.7rem;
+          color: var(--color-text-muted);
+          background: var(--color-bg-tertiary);
+          padding: 2px 8px;
+          border-radius: var(--radius-full);
+          border: 1px solid var(--color-border);
         }
       `}</style>
         </div>

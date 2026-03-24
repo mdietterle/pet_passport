@@ -9,6 +9,7 @@ import PetQRCode from '@/components/pets/PetQRCode';
 import PetPassportPrint from '@/components/pets/PetPassportPrint';
 import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
 import { canExportPDF, canUseQRCode } from '@/lib/planFeatures';
+import { getEditablePetIds } from '@/lib/planLimits';
 
 const SPECIES_EMOJI: Record<string, string> = {
   dog: '🐶', cat: '🐱', bird: '🐦', rabbit: '🐰', fish: '🐟', reptile: '🦎', other: '🐾',
@@ -62,11 +63,33 @@ export default async function PetDetailPage({ params }: { params: { id: string }
 
   const plan = (profile as any)?.plans;
 
+  // Determine if this pet is read-only (downgrade scenario)
+  const { data: allPetsRaw } = await supabase
+    .from('pets')
+    .select('id')
+    .eq('owner_id', user.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: true });
+  const editableIds = getEditablePetIds(plan, (allPetsRaw as any[]) || []);
+  const readOnly = !editableIds.has(pet.id);
+
   return (
     <div className="page-container">
       <Link href="/dashboard/pets" className="btn btn-ghost btn-sm" style={{ marginBottom: 'var(--space-4)' }}>
         <ArrowLeft size={16} /> Meus Pets
       </Link>
+
+      {/* Read-only banner */}
+      {readOnly && (
+        <div className="alert alert-warning" style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <Lock size={16} />
+          <div>
+            <strong>Pet em modo somente leitura.</strong> Seu plano atual permite apenas {plan?.max_pets} pet(s). Faça{' '}
+            <Link href="/dashboard/plans" style={{ color: 'var(--color-gold-light)', fontWeight: 600 }}>upgrade</Link>{' '}
+            para editar este pet.
+          </div>
+        </div>
+      )}
 
       {/* Pet Header */}
       <div className="pet-header card">
@@ -84,9 +107,11 @@ export default async function PetDetailPage({ params }: { params: { id: string }
               <Link href={`/dashboard/pets/${pet.id}/report`} className="btn btn-secondary btn-sm">
                 <FileText size={14} /> Relatório
               </Link>
-              <Link href={`/dashboard/pets/${pet.id}/edit`} className="btn btn-secondary btn-sm">
-                <Edit size={14} /> Editar
-              </Link>
+              {!readOnly && (
+                <Link href={`/dashboard/pets/${pet.id}/edit`} className="btn btn-secondary btn-sm">
+                  <Edit size={14} /> Editar
+                </Link>
+              )}
             </div>
           </div>
           <div className="pet-header-meta">
@@ -129,6 +154,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
         examAttachments={examAttachments || []}
         treatments={treatments || []}
         plan={plan}
+        readOnly={readOnly}
       />
 
       {/* QR Code Section — Pro/Premium only */}

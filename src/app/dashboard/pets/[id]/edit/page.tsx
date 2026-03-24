@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, Loader2, Trash2, Camera, X } from 'lucide-react';
-import { SPECIES_LABELS, SEX_LABELS } from '@/lib/planLimits';
+import { SPECIES_LABELS, SEX_LABELS, getEditablePetIds } from '@/lib/planLimits';
 import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
 
 export default function EditPetPage({ params }: { params: { id: string } }) {
@@ -23,24 +23,39 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
     });
 
     useEffect(() => {
-        supabase.from('pets').select('*').eq('id', params.id).single().then(({ data: rawData }) => {
+        async function loadPet() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { router.push('/login'); return; }
+
+            const { data: rawData } = await supabase.from('pets').select('*').eq('id', params.id).single();
             const data = rawData as any;
-            if (data) {
-                setForm({
-                    name: data.name,
-                    species: data.species,
-                    breed: data.breed || '',
-                    birth_date: data.birth_date || '',
-                    sex: data.sex || 'unknown',
-                    weight_kg: data.weight_kg?.toString() || '',
-                    microchip: data.microchip || '',
-                    color: data.color || '',
-                    notes: data.notes || '',
-                });
-                setPhotoUrl(data.photo_url || null);
+            if (!data) { setFetching(false); return; }
+
+            // Check if pet is read-only (downgrade scenario)
+            const { data: profile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
+            const plan = profile?.plans;
+            const { data: allPets } = await supabase.from('pets').select('id').eq('owner_id', user.id).eq('is_active', true).order('created_at', { ascending: true });
+            const editableIds = getEditablePetIds(plan, (allPets as any[]) || []);
+            if (!editableIds.has(params.id)) {
+                router.push(`/dashboard/pets/${params.id}`);
+                return;
             }
+
+            setForm({
+                name: data.name,
+                species: data.species,
+                breed: data.breed || '',
+                birth_date: data.birth_date || '',
+                sex: data.sex || 'unknown',
+                weight_kg: data.weight_kg?.toString() || '',
+                microchip: data.microchip || '',
+                color: data.color || '',
+                notes: data.notes || '',
+            });
+            setPhotoUrl(data.photo_url || null);
             setFetching(false);
-        });
+        }
+        loadPet();
     }, [params.id]);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {

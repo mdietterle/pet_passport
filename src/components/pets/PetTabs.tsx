@@ -42,11 +42,12 @@ interface Props {
     examAttachments: ExamAttachment[];
     treatments: Treatment[];
     plan: Plan | null;
+    readOnly?: boolean;
 }
 
 type TabId = 'vaccinations' | 'consultations' | 'occurrences' | 'weights' | 'parasites' | 'medications';
 
-export default function PetTabs({ pet, vaccinations: initVacc, consultations: initConsult, occurrences: initOccur, weights: initWeights, parasites: initParasites, medications: initMeds, examAttachments: initExamAttachments, treatments: initTreatments, plan }: Props) {
+export default function PetTabs({ pet, vaccinations: initVacc, consultations: initConsult, occurrences: initOccur, weights: initWeights, parasites: initParasites, medications: initMeds, examAttachments: initExamAttachments, treatments: initTreatments, plan, readOnly = false }: Props) {
     const router = useRouter();
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState<TabId>('vaccinations');
@@ -387,6 +388,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             {/* ─── VACCINATIONS ─── */}
             {activeTab === 'vaccinations' && (
                 <div>
+                    {!readOnly && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         {limits && !limits.canAddVaccination ? (
                             <div className="alert alert-warning" style={{ flex: 1 }}>
@@ -398,6 +400,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                             </button>
                         )}
                     </div>
+                    )}
                     {vaccinations.length === 0 ? (
                         <div className="empty-state card"><div className="empty-state-icon">💉</div><p className="empty-state-title">Nenhuma vacina registrada</p></div>
                     ) : (
@@ -412,12 +415,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                             <td>{v.next_due_date ? <span className="badge badge-gold">{formatDate(v.next_due_date)}</span> : '—'}</td>
                                             <td style={{ color: 'var(--color-text-secondary)' }}>{v.vet_name || '—'}</td>
                                             <td style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>{v.batch || '—'}</td>
+                                            {!readOnly && (
                                             <td>
                                                 <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                                                     <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('vaccinations', v)}><Edit size={14} /></button>
                                                     <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('vaccinations', v.id)} disabled={deleteId === v.id}>{deleteId === v.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
                                                 </div>
                                             </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -430,6 +435,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             {/* ─── CONSULTATIONS ─── */}
             {activeTab === 'consultations' && (
                 <div>
+                    {!readOnly && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         {limits && !limits.canAddConsultation ? (
                             <div className="alert alert-warning" style={{ flex: 1 }}>
@@ -441,6 +447,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                             </button>
                         )}
                     </div>
+                    )}
                     {consultations.length === 0 ? (
                         <div className="empty-state card"><div className="empty-state-icon">🩺</div><p className="empty-state-title">Nenhuma consulta registrada</p></div>
                     ) : (
@@ -470,12 +477,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                             {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                                                         </button>
                                                     </td>
+                                                    {!readOnly && (
                                                     <td>
                                                         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                                                             <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('consultations', c)}><Edit size={14} /></button>
                                                             <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('consultations', c.id)} disabled={deleteId === c.id}>{deleteId === c.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
                                                         </div>
                                                     </td>
+                                                    )}
                                                 </tr>
                                                 {isExpanded && (
                                                     <tr key={`${c.id}-treatments`}>
@@ -483,9 +492,11 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                             <div style={{ padding: 'var(--space-3) var(--space-4)' }}>
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
                                                                     <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>💊 Tratamentos Indicados</span>
+                                                                    {!readOnly && (
                                                                     <button className="btn btn-primary btn-sm" style={{ fontSize: '0.75rem', padding: '3px 10px' }} onClick={() => openTreatmentAdd(c.id)}>
                                                                         <Plus size={13} /> Tratamento
                                                                     </button>
+                                                                    )}
                                                                 </div>
                                                                 {cTreatments.length === 0 ? (
                                                                     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.82rem', fontStyle: 'italic' }}>Nenhum tratamento registrado para esta consulta.</p>
@@ -510,10 +521,12 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                                                         </div>
                                                                                         {t.notes && <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '4px', fontStyle: 'italic' }}>{t.notes}</p>}
                                                                                     </div>
+                                                                                    {!readOnly && (
                                                                                     <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                                                                                         <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openTreatmentEdit(t)}><Edit size={12} /></button>
                                                                                         <button className="btn btn-danger btn-icon btn-sm" onClick={() => deleteTreatment(t.id)} disabled={deleteId === t.id}>{deleteId === t.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}</button>
                                                                                     </div>
+                                                                                    )}
                                                                                 </div>
                                                                             </div>
                                                                         ))}
@@ -543,7 +556,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                     <div key={c.id} className="exam-section">
                                         <div className="exam-section-header">
                                             <span className="exam-consult-label">{formatDate(c.date)} — {c.reason}</span>
-                                            {canUploadExams(plan) ? (
+                                            {!readOnly && canUploadExams(plan) ? (
                                                 <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
                                                     {examUploading && examConsultId === c.id
                                                         ? <><Loader2 size={13} className="animate-spin" /> Enviando...</>
@@ -593,6 +606,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             )}
             {activeTab === 'occurrences' && (
                 <div>
+                    {!readOnly && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         {limits && !limits.canAddOccurrence ? (
                             <div className="alert alert-warning" style={{ flex: 1 }}>
@@ -604,6 +618,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                             </button>
                         )}
                     </div>
+                    )}
                     {occurrences.length === 0 ? (
                         <div className="empty-state card"><div className="empty-state-icon">📋</div><p className="empty-state-title">Nenhuma ocorrência registrada</p></div>
                     ) : (
@@ -617,12 +632,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                             <td style={{ whiteSpace: 'nowrap' }}>{formatDate(o.date)}</td>
                                             <td style={{ color: 'var(--color-text-secondary)' }}>{o.description || '—'}</td>
                                             <td>{o.cost_brl ? `R$ ${o.cost_brl.toFixed(2)}` : '—'}</td>
+                                            {!readOnly && (
                                             <td>
                                                 <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                                                     <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('occurrences', o)}><Edit size={14} /></button>
                                                     <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('occurrences', o.id)} disabled={deleteId === o.id}>{deleteId === o.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
                                                 </div>
                                             </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -635,11 +652,13 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             {/* ─── WEIGHTS ─── */}
             {activeTab === 'weights' && (
                 <div>
+                    {!readOnly && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         <button className="btn btn-primary btn-sm" onClick={() => { setEditItem(null); setWeightForm({ date: new Date().toISOString().split('T')[0], weight_kg: '', notes: '' }); setShowModal('weights'); }}>
                             <Plus size={16} /> Registrar Peso
                         </button>
                     </div>
+                    )}
                     {weights.length === 0 ? (
                         <div className="empty-state card">
                             <div className="empty-state-icon">⚖️</div>
@@ -655,12 +674,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                             <td style={{ whiteSpace: 'nowrap' }}>{formatDate(w.date)}</td>
                                             <td style={{ fontWeight: 600 }}>{w.weight_kg} kg</td>
                                             <td style={{ color: 'var(--color-text-secondary)' }}>{w.notes || '—'}</td>
+                                            {!readOnly && (
                                             <td>
                                                 <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                                                     <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('weights', w)}><Edit size={14} /></button>
                                                     <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('weights', w.id)} disabled={deleteId === w.id}>{deleteId === w.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
                                                 </div>
                                             </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -673,11 +694,13 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             {/* ─── PARASITE CONTROLS ─── */}
             {activeTab === 'parasites' && (
                 <div>
+                    {!readOnly && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         <button className="btn btn-primary btn-sm" onClick={() => { setEditItem(null); setParasiteForm({ type: 'flea_tick', date: new Date().toISOString().split('T')[0], next_due_date: '', medication_name: '', weight_at_time_kg: '', notes: '' }); setShowModal('parasites'); }}>
                             <Plus size={16} /> Registrar Controle
                         </button>
                     </div>
+                    )}
                     {parasites.length === 0 ? (
                         <div className="empty-state card">
                             <div className="empty-state-icon">🛡️</div>
@@ -704,12 +727,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                         </span>
                                                     ) : '—'}
                                                 </td>
+                                                {!readOnly && (
                                                 <td>
                                                     <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                                                         <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('parasites', p)}><Edit size={14} /></button>
                                                         <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('parasites', p.id)} disabled={deleteId === p.id}>{deleteId === p.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
                                                     </div>
                                                 </td>
+                                                )}
                                             </tr>
                                         )
                                     })}
@@ -723,11 +748,13 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             {/* ─── MEDICATIONS ─── */}
             {activeTab === 'medications' && (
                 <div>
+                    {!readOnly && (
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-4)' }}>
                         <button className="btn btn-primary btn-sm" onClick={() => { setEditItem(null); setMedForm({ medication_name: '', dosage: '', frequency: '', start_date: new Date().toISOString().split('T')[0], end_date: '', active: true, notes: '' }); setShowModal('medications'); }}>
                             <Plus size={16} /> Adicionar Remédio
                         </button>
                     </div>
+                    )}
                     {medications.length === 0 ? (
                         <div className="empty-state card">
                             <div className="empty-state-icon">💊</div>
@@ -751,12 +778,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                                     {m.active ? 'Ativo' : 'Inativo'}
                                                 </span>
                                             </td>
+                                            {!readOnly && (
                                             <td>
                                                 <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                                                     <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit('medications', m)}><Edit size={14} /></button>
                                                     <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete('medications', m.id)} disabled={deleteId === m.id}>{deleteId === m.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}</button>
                                                 </div>
                                             </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>

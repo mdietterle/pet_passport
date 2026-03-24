@@ -38,6 +38,18 @@ export default function NewPetPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { router.push('/login'); return; }
 
+        // Validate plan pet limit before inserting
+        const { data: profile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
+        const plan = profile?.plans;
+        if (plan && plan.max_pets !== null) {
+            const { count } = await supabase.from('pets').select('*', { count: 'exact', head: true }).eq('owner_id', user.id).eq('is_active', true);
+            if (count !== null && count >= plan.max_pets) {
+                setError(`Limite de ${plan.max_pets} pet(s) atingido no seu plano. Faça upgrade para adicionar mais.`);
+                setLoading(false);
+                return;
+            }
+        }
+
         const { data, error: err } = await (supabase.from('pets') as any).insert({
             owner_id: user.id,
             name: form.name,

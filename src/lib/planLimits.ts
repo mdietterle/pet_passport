@@ -51,6 +51,22 @@ export function checkPlanLimits(
     };
 }
 
+/**
+ * Given a list of pets ordered by created_at ASC, returns the IDs of pets
+ * that are within the plan limit (editable). Pets beyond the limit are read-only.
+ * If plan is null or max_pets is null (unlimited), all pets are editable.
+ */
+export function getEditablePetIds(
+    plan: Plan | null,
+    petsOrderedByCreatedAt: { id: string }[]
+): Set<string> {
+    if (!plan || plan.max_pets === null) {
+        return new Set(petsOrderedByCreatedAt.map((p) => p.id));
+    }
+    const editable = petsOrderedByCreatedAt.slice(0, plan.max_pets);
+    return new Set(editable.map((p) => p.id));
+}
+
 export function getPlanBadgeColor(planName: string): string {
     switch (planName) {
         case 'free':
