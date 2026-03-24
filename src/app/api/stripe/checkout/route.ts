@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
         // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card', 'pix'],
+            payment_method_types: ['card'],
             line_items: [
                 {
                     price_data: {
@@ -106,10 +106,9 @@ export async function POST(request: NextRequest) {
             code: error.code,
             raw: error
         });
-        return NextResponse.json({ 
-            error: 'Internal server error', 
-            details: error.message,
-            stack: error.stack
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
         }, { status: 500 });
     }
 }
