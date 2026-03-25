@@ -30,7 +30,7 @@ values
   ('free', 'Gratuito', 0, 1, 5, 5, 10, '["1 pet", "5 vacinas por pet", "5 consultas por pet", "10 ocorrências por pet"]'::jsonb, 0),
   ('basic', 'Básico', 9.90, 3, null, 20, 50, '["3 pets", "Vacinas ilimitadas", "20 consultas por pet", "50 ocorrências por pet"]'::jsonb, 1),
   ('pro', 'Pro', 15.00, 5, 50, 50, 50, '["5 pets", "50 registros por tipo por pet", "Suporte prioritário"]'::jsonb, 2),
-  ('premium', 'Premium', 24.90, null, null, null, null, '["Pets ilimitados", "Registros ilimitados", "Exportar PDF", "Upload de fotos", "Lembretes de consultas"]'::jsonb, 3)
+  ('premium', 'Premium', 24.90, null, null, null, null, '["Pets ilimitados", "Registros ilimitados", "Exportar PDF", "Upload de fotos", "Galeria de fotos (até 10 por pet)", "Lembretes de consultas"]'::jsonb, 3)
 on conflict (name) do nothing;
 
 -- ============================================================

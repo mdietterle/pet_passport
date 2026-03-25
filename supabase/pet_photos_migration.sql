@@ -32,3 +32,8 @@ CREATE POLICY "Users can delete their own pet photos"
     USING (
         pet_id IN (SELECT id FROM pets WHERE owner_id = auth.uid())
     );
+
+-- Update premium plan features to include photo gallery
+UPDATE plans
+SET features = '["Pets ilimitados", "Registros ilimitados", "Exportar PDF", "Upload de fotos", "Galeria de fotos (até 10 por pet)", "Lembretes de consultas"]'::jsonb
+WHERE name = 'premium';

@@ -2,7 +2,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Database } from '@/lib/supabase/types';
-import { ArrowLeft, Edit, FileText, Lock } from 'lucide-react';
+import { ArrowLeft, Edit, FileText, Lock, Camera } from 'lucide-react';
 import { petAge, formatDate } from '@/lib/dateUtils';
 import PetTabs from '@/components/pets/PetTabs';
 import PetQRCode from '@/components/pets/PetQRCode';
