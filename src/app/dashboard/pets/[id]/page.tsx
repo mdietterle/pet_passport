@@ -7,8 +7,9 @@ import { petAge, formatDate } from '@/lib/dateUtils';
 import PetTabs from '@/components/pets/PetTabs';
 import PetQRCode from '@/components/pets/PetQRCode';
 import PetPassportPrint from '@/components/pets/PetPassportPrint';
+import PetPhotoGallery from '@/components/pets/PetPhotoGallery';
 import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
-import { canExportPDF, canUseQRCode } from '@/lib/planFeatures';
+import { canExportPDF, canUseQRCode, canUploadPetPhotos } from '@/lib/planFeatures';
 import { getEditablePetIds } from '@/lib/planLimits';
 
 const SPECIES_EMOJI: Record<string, string> = {
@@ -50,6 +51,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
     { data: medications },
     { data: examAttachments },
     { data: treatments },
+    { data: petPhotos },
   ] = await Promise.all([
     supabase.from('vaccinations').select('*').eq('pet_id', pet.id).order('date', { ascending: false }) as any,
     supabase.from('vet_consultations').select('*').eq('pet_id', pet.id).order('date', { ascending: false }) as any,
@@ -59,6 +61,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
     supabase.from('medications').select('*').eq('pet_id', pet.id).order('start_date', { ascending: false }) as any,
     supabase.from('exam_attachments').select('*').eq('pet_id', pet.id).order('uploaded_at', { ascending: false }) as any,
     supabase.from('treatments').select('*').eq('pet_id', pet.id).order('created_at', { ascending: false }) as any,
+    (supabase.from('pet_photos') as any).select('*').eq('pet_id', pet.id).order('sort_order', { ascending: true }),
   ]);
 
   const plan = (profile as any)?.plans;
@@ -141,6 +144,24 @@ export default async function PetDetailPage({ params }: { params: { id: string }
 
       {/* RG Animal Banner */}
       <RGAnimalBanner />
+
+      {/* Pet Photo Gallery — Premium only */}
+      {canUploadPetPhotos(plan) ? (
+        <PetPhotoGallery
+          petId={pet.id}
+          initialPhotos={petPhotos || []}
+          readOnly={readOnly}
+        />
+      ) : (
+        <div className="feature-gate-card">
+          <div className="feature-gate-icon"><Camera size={22} /></div>
+          <div>
+            <div className="feature-gate-title">Galeria de Fotos</div>
+            <p className="feature-gate-desc">Adicione até 10 fotos do {pet.name}. Disponível no plano <strong>Premium</strong>.</p>
+          </div>
+          <Link href="/dashboard/plans" className="btn btn-primary btn-sm">Fazer Upgrade</Link>
+        </div>
+      )}
 
       {/* Tabs with records */}
       <PetTabs

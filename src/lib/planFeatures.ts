@@ -21,3 +21,8 @@ export function canUploadExams(plan: Plan | null | undefined): boolean {
 export function canSeeAlerts(plan: Plan | null | undefined): boolean {
     return plan?.name !== 'free' && plan != null;
 }
+
+/** Pet photo gallery — Premium only */
+export function canUploadPetPhotos(plan: Plan | null | undefined): boolean {
+    return plan?.name === 'premium';
+}

@@ -248,3 +248,13 @@ export interface ExamAttachment {
     file_type: string;
     uploaded_at: string;
 }
+
+export interface PetPhoto {
+    id: string;
+    pet_id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+    sort_order: number;
+    created_at: string;
+}
