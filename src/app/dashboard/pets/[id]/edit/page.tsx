@@ -201,6 +201,13 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
                             </select>
                         </div>
                         <div className="form-group">
+                            <span className="form-label" style={{ visibility: 'hidden' }}>Castrado</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', height: '42px' }}>
+                                <input id="is_neutered" name="is_neutered" type="checkbox" checked={form.is_neutered} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--color-primary)', cursor: 'pointer' }} />
+                                <label className="form-label" htmlFor="is_neutered" style={{ margin: 0, cursor: 'pointer' }}>Castrado(a)</label>
+                            </div>
+                        </div>
+                        <div className="form-group">
                             <label className="form-label">Peso (kg)</label>
                             <input name="weight_kg" type="number" step="0.1" min="0" className="form-input" value={form.weight_kg} onChange={handleChange} />
                         </div>
@@ -212,10 +219,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
                             <label className="form-label">Microchip</label>
                             <input name="microchip" className="form-input" value={form.microchip} onChange={handleChange} />
                         </div>
-                        <div className="form-group form-full" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                            <input id="is_neutered" name="is_neutered" type="checkbox" checked={form.is_neutered} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--color-primary)' }} />
-                            <label className="form-label" htmlFor="is_neutered" style={{ margin: 0 }}>Castrado(a)</label>
-                        </div>
+
 
                         <div className="form-group form-full">
                             <label className="form-label">Observações</label>
