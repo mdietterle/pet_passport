@@ -38,8 +38,18 @@ export default function NewPetPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { router.push('/login'); return; }
 
-        // Validate plan pet limit before inserting
-        const { data: profile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
+        // Ensure profile exists (fallback if trigger didn't fire)
+        let { data: profile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
+        if (!profile) {
+            const { data: freePlan } = await (supabase.from('plans') as any).select('id').eq('name', 'free').single();
+            await (supabase.from('profiles') as any).insert({
+                id: user.id,
+                full_name: user.user_metadata?.full_name || null,
+                plan_id: freePlan?.id || null,
+            });
+            const { data: retryProfile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
+            profile = retryProfile;
+        }
         const plan = profile?.plans;
         if (plan && plan.max_pets !== null) {
             const { count } = await supabase.from('pets').select('*', { count: 'exact', head: true }).eq('owner_id', user.id).eq('is_active', true);

@@ -16,11 +16,27 @@ export default async function DashboardLayout({
         redirect('/login');
     }
 
-    const { data: profile } = await supabase
+    // Ensure profile exists (fallback if auth trigger didn't fire)
+    let { data: profile } = await supabase
         .from('profiles')
         .select('payment_method, plan_expires_at, subscription_status')
         .eq('id', user.id)
         .single();
+
+    if (!profile) {
+        const { data: freePlan } = await (supabase.from('plans') as any).select('id').eq('name', 'free').single();
+        await (supabase.from('profiles') as any).insert({
+            id: user.id,
+            full_name: user.user_metadata?.full_name || null,
+            plan_id: freePlan?.id || null,
+        });
+        const { data: retryProfile } = await supabase
+            .from('profiles')
+            .select('payment_method, plan_expires_at, subscription_status')
+            .eq('id', user.id)
+            .single();
+        profile = retryProfile;
+    }
 
     const userProfile = profile as any;
 
