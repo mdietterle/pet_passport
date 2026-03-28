@@ -138,11 +138,17 @@ export default function NewPetPage() {
                         </div>
 
                         <div className="form-group">
-                            <span className="form-label" style={{ visibility: 'hidden' }}>Castrado</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', height: '42px' }}>
-                                <input id="is_neutered" name="is_neutered" type="checkbox" checked={form.is_neutered} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--color-primary)', cursor: 'pointer' }} />
-                                <label className="form-label" htmlFor="is_neutered" style={{ margin: 0, cursor: 'pointer' }}>Castrado(a)</label>
-                            </div>
+                            <label className="form-label" htmlFor="is_neutered">Castrado(a)</label>
+                            <select
+                                id="is_neutered"
+                                name="is_neutered"
+                                className="form-select"
+                                value={form.is_neutered ? 'true' : 'false'}
+                                onChange={(e) => setForm(prev => ({ ...prev, is_neutered: e.target.value === 'true' }))}
+                            >
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
                         </div>
 
                         <div className="form-group">
