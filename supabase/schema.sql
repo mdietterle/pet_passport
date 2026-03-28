@@ -82,6 +82,7 @@ create table if not exists pets (
   microchip text,
   color text,
   notes text,
+  is_neutered boolean default false,
   is_active boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()

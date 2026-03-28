@@ -116,6 +116,7 @@ export interface Pet {
     microchip: string | null;
     color: string | null;
     notes: string | null;
+    is_neutered: boolean;
     is_active: boolean;
     created_at: string;
     updated_at: string;

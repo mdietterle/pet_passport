@@ -24,10 +24,13 @@ export default function NewPetPage() {
         microchip: '',
         color: '',
         notes: '',
+        is_neutered: false,
     });
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        const target = e.target;
+        const value = target instanceof HTMLInputElement && target.type === 'checkbox' ? target.checked : target.value;
+        setForm((prev) => ({ ...prev, [target.name]: value }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -71,6 +74,7 @@ export default function NewPetPage() {
             microchip: form.microchip || null,
             color: form.color || null,
             notes: form.notes || null,
+            is_neutered: form.is_neutered,
         }).select().single();
 
         if (err) {
@@ -146,6 +150,11 @@ export default function NewPetPage() {
                         <div className="form-group">
                             <label className="form-label" htmlFor="microchip">Microchip</label>
                             <input id="microchip" name="microchip" className="form-input" placeholder="Número do microchip" value={form.microchip} onChange={handleChange} />
+                        </div>
+
+                        <div className="form-group form-full" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                            <input id="is_neutered" name="is_neutered" type="checkbox" checked={form.is_neutered} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--color-primary)' }} />
+                            <label className="form-label" htmlFor="is_neutered" style={{ margin: 0 }}>Castrado(a)</label>
                         </div>
 
                         <div className="form-group form-full">

@@ -19,7 +19,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
     const photoInputRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState({
         name: '', species: 'dog', breed: '', birth_date: '', sex: 'unknown',
-        weight_kg: '', microchip: '', color: '', notes: '',
+        weight_kg: '', microchip: '', color: '', notes: '', is_neutered: false,
     });
 
     useEffect(() => {
@@ -51,6 +51,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
                 microchip: data.microchip || '',
                 color: data.color || '',
                 notes: data.notes || '',
+                is_neutered: data.is_neutered || false,
             });
             setPhotoUrl(data.photo_url || null);
             setFetching(false);
@@ -59,7 +60,9 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
     }, [params.id]);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        const target = e.target;
+        const value = target instanceof HTMLInputElement && target.type === 'checkbox' ? target.checked : target.value;
+        setForm((prev) => ({ ...prev, [target.name]: value }));
     }
 
     async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -107,6 +110,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
             birth_date: form.birth_date || null, sex: form.sex as any,
             weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
             microchip: form.microchip || null, color: form.color || null, notes: form.notes || null,
+            is_neutered: form.is_neutered,
         }).eq('id', params.id);
         if (err) { setError('Erro ao salvar. Tente novamente.'); setLoading(false); }
         else router.push(`/dashboard/pets/${params.id}`);
@@ -208,6 +212,11 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
                             <label className="form-label">Microchip</label>
                             <input name="microchip" className="form-input" value={form.microchip} onChange={handleChange} />
                         </div>
+                        <div className="form-group form-full" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                            <input id="is_neutered" name="is_neutered" type="checkbox" checked={form.is_neutered} onChange={handleChange} style={{ width: 18, height: 18, accentColor: 'var(--color-primary)' }} />
+                            <label className="form-label" htmlFor="is_neutered" style={{ margin: 0 }}>Castrado(a)</label>
+                        </div>
+
                         <div className="form-group form-full">
                             <label className="form-label">Observações</label>
                             <textarea name="notes" className="form-textarea" rows={3} value={form.notes} onChange={handleChange} />

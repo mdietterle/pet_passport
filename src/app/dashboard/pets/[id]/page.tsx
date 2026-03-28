@@ -130,6 +130,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
           <div className="pet-header-details">
             {pet.color && <span className="pet-detail">🎨 {pet.color}</span>}
             {pet.microchip && <span className="pet-detail">💾 Microchip: {pet.microchip}</span>}
+            {pet.is_neutered && <span className="pet-detail">✂️ Castrado(a)</span>}
             {pet.birth_date && (
               <span className="pet-detail">
                 🎂 {formatDate(pet.birth_date)}
