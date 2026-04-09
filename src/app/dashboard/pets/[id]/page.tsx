@@ -12,6 +12,8 @@ import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
 import { canExportPDF, canUseQRCode, canUploadPetPhotos } from '@/lib/planFeatures';
 import { getEditablePetIds } from '@/lib/planLimits';
 
+export const dynamic = 'force-dynamic';
+
 const SPECIES_EMOJI: Record<string, string> = {
   dog: '🐶', cat: '🐱', bird: '🐦', rabbit: '🐰', fish: '🐟', reptile: '🦎', other: '🐾',
 };

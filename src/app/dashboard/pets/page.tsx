@@ -5,6 +5,8 @@ import { Plus, Lock } from 'lucide-react';
 import { petAge } from '@/lib/dateUtils';
 import { getEditablePetIds } from '@/lib/planLimits';
 
+export const dynamic = 'force-dynamic';
+
 const SPECIES_EMOJI: Record<string, string> = {
     dog: '🐶', cat: '🐱', bird: '🐦', rabbit: '🐰', fish: '🐟', reptile: '🦎', other: '🐾',
 };

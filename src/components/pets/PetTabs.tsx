@@ -64,6 +64,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [showModal, setShowModal] = useState<TabId | 'treatment' | null>(null);
     const [editItem, setEditItem] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [expandedConsult, setExpandedConsult] = useState<string | null>(null);
     const [treatmentConsultId, setTreatmentConsultId] = useState<string | null>(null);
@@ -80,15 +81,17 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [vaccForm, setVaccForm] = useState({ vaccine_name: '', date: '', next_due_date: '', vet_name: '', clinic: '', batch: '', manufacturer: '', notes: '' });
 
     async function saveVaccination() {
-        console.log('[saveVaccination] vaccDocs at save time:', vaccDocs, 'existingUrls:', Array.from(existingVaccDocUrls));
+        setSaveError(null);
         setLoading(true);
         const data = { pet_id: pet.id, vaccine_name: vaccForm.vaccine_name, date: vaccForm.date, next_due_date: vaccForm.next_due_date || null, vet_name: vaccForm.vet_name || null, clinic: vaccForm.clinic || null, batch: vaccForm.batch || null, manufacturer: vaccForm.manufacturer || null, notes: vaccForm.notes || null };
         let savedId: string | null = null;
         if (editItem) {
-            const { data: updated } = await (supabase.from('vaccinations') as any).update(data).eq('id', editItem.id).select().single();
+            const { data: updated, error } = await (supabase.from('vaccinations') as any).update(data).eq('id', editItem.id).select().single();
+            if (error) { setSaveError('Erro ao atualizar vacina. Tente novamente.'); console.error('[saveVaccination] update error:', error); setLoading(false); return; }
             if (updated) { setVaccinations((prev) => prev.map((v) => v.id === updated.id ? updated : v)); savedId = updated.id; }
         } else {
-            const { data: created } = await (supabase.from('vaccinations') as any).insert(data).select().single();
+            const { data: created, error } = await (supabase.from('vaccinations') as any).insert(data).select().single();
+            if (error) { setSaveError('Erro ao salvar vacina. Tente novamente.'); console.error('[saveVaccination] insert error:', error); setLoading(false); return; }
             if (created) { setVaccinations((prev) => [created, ...prev]); savedId = created.id; }
         }
         // Only insert NET-NEW documents (not ones already in the DB)
@@ -108,14 +111,17 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [consultForm, setConsultForm] = useState({ date: '', vet_name: '', clinic: '', reason: '', diagnosis: '', prescription: '', cost_brl: '', follow_up_date: '', notes: '' });
 
     async function saveConsultation() {
+        setSaveError(null);
         setLoading(true);
         const data = { pet_id: pet.id, date: consultForm.date, vet_name: consultForm.vet_name || null, clinic: consultForm.clinic || null, reason: consultForm.reason, diagnosis: consultForm.diagnosis || null, prescription: consultForm.prescription || null, cost_brl: consultForm.cost_brl ? parseFloat(consultForm.cost_brl) : null, follow_up_date: consultForm.follow_up_date || null, notes: consultForm.notes || null };
         let savedId: string | null = null;
         if (editItem) {
-            const { data: updated } = await (supabase.from('vet_consultations') as any).update(data).eq('id', editItem.id).select().single();
+            const { data: updated, error } = await (supabase.from('vet_consultations') as any).update(data).eq('id', editItem.id).select().single();
+            if (error) { setSaveError('Erro ao atualizar consulta. Tente novamente.'); console.error('[saveConsultation] update error:', error); setLoading(false); return; }
             if (updated) { setConsultations((prev) => prev.map((c) => c.id === updated.id ? updated : c)); savedId = updated.id; }
         } else {
-            const { data: created } = await (supabase.from('vet_consultations') as any).insert(data).select().single();
+            const { data: created, error } = await (supabase.from('vet_consultations') as any).insert(data).select().single();
+            if (error) { setSaveError('Erro ao salvar consulta. Tente novamente.'); console.error('[saveConsultation] insert error:', error); setLoading(false); return; }
             if (created) { setConsultations((prev) => [created, ...prev]); savedId = created.id; }
         }
         if (savedId && consultDocs.length > 0) {
@@ -149,13 +155,16 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [occurForm, setOccurForm] = useState({ type: 'other', date: '', description: '', cost_brl: '', notes: '' });
 
     async function saveOccurrence() {
+        setSaveError(null);
         setLoading(true);
         const data = { pet_id: pet.id, type: occurForm.type as any, date: occurForm.date, description: occurForm.description || null, cost_brl: occurForm.cost_brl ? parseFloat(occurForm.cost_brl) : null, notes: occurForm.notes || null };
         if (editItem) {
-            const { data: updated } = await (supabase.from('occurrences') as any).update(data).eq('id', editItem.id).select().single();
+            const { data: updated, error } = await (supabase.from('occurrences') as any).update(data).eq('id', editItem.id).select().single();
+            if (error) { setSaveError('Erro ao atualizar ocorrência. Tente novamente.'); console.error('[saveOccurrence] update error:', error); setLoading(false); return; }
             if (updated) setOccurrences((prev) => prev.map((o) => o.id === updated.id ? updated : o));
         } else {
-            const { data: created } = await (supabase.from('occurrences') as any).insert(data).select().single();
+            const { data: created, error } = await (supabase.from('occurrences') as any).insert(data).select().single();
+            if (error) { setSaveError('Erro ao salvar ocorrência. Tente novamente.'); console.error('[saveOccurrence] insert error:', error); setLoading(false); return; }
             if (created) setOccurrences((prev) => [created, ...prev]);
         }
         setLoading(false);
@@ -166,13 +175,16 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [weightForm, setWeightForm] = useState({ date: new Date().toISOString().split('T')[0], weight_kg: '', notes: '' });
 
     async function saveWeight() {
+        setSaveError(null);
         setLoading(true);
         const data = { pet_id: pet.id, date: weightForm.date, weight_kg: parseFloat(weightForm.weight_kg), notes: weightForm.notes || null };
         if (editItem) {
-            const { data: updated } = await (supabase.from('pet_weights') as any).update(data).eq('id', editItem.id).select().single();
+            const { data: updated, error } = await (supabase.from('pet_weights') as any).update(data).eq('id', editItem.id).select().single();
+            if (error) { setSaveError('Erro ao atualizar peso. Tente novamente.'); console.error('[saveWeight] update error:', error); setLoading(false); return; }
             if (updated) setWeights((prev) => prev.map((w) => w.id === updated.id ? updated : w));
         } else {
-            const { data: created } = await (supabase.from('pet_weights') as any).insert(data).select().single();
+            const { data: created, error } = await (supabase.from('pet_weights') as any).insert(data).select().single();
+            if (error) { setSaveError('Erro ao salvar peso. Tente novamente.'); console.error('[saveWeight] insert error:', error); setLoading(false); return; }
             if (created) setWeights((prev) => [created, ...prev]);
         }
         setLoading(false);
@@ -183,6 +195,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [parasiteForm, setParasiteForm] = useState({ type: 'flea_tick', date: new Date().toISOString().split('T')[0], next_due_date: '', medication_name: '', weight_at_time_kg: '', notes: '' });
 
     async function saveParasite() {
+        setSaveError(null);
         setLoading(true);
         const data = {
             pet_id: pet.id,
@@ -194,10 +207,12 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             notes: parasiteForm.notes || null
         };
         if (editItem) {
-            const { data: updated } = await (supabase.from('parasite_controls') as any).update(data).eq('id', editItem.id).select().single();
+            const { data: updated, error } = await (supabase.from('parasite_controls') as any).update(data).eq('id', editItem.id).select().single();
+            if (error) { setSaveError('Erro ao atualizar controle parasitário. Tente novamente.'); console.error('[saveParasite] update error:', error); setLoading(false); return; }
             if (updated) setParasites((prev) => prev.map((p) => p.id === updated.id ? updated : p));
         } else {
-            const { data: created } = await (supabase.from('parasite_controls') as any).insert(data).select().single();
+            const { data: created, error } = await (supabase.from('parasite_controls') as any).insert(data).select().single();
+            if (error) { setSaveError('Erro ao salvar controle parasitário. Tente novamente.'); console.error('[saveParasite] insert error:', error); setLoading(false); return; }
             if (created) setParasites((prev) => [created, ...prev]);
         }
         setLoading(false);
@@ -208,6 +223,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     const [medForm, setMedForm] = useState({ medication_name: '', dosage: '', frequency: '', start_date: new Date().toISOString().split('T')[0], end_date: '', active: true, notes: '' });
 
     async function saveMedication() {
+        setSaveError(null);
         setLoading(true);
         const data = {
             pet_id: pet.id,
@@ -220,10 +236,12 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             notes: medForm.notes || null
         };
         if (editItem) {
-            const { data: updated } = await (supabase.from('medications') as any).update(data).eq('id', editItem.id).select().single();
+            const { data: updated, error } = await (supabase.from('medications') as any).update(data).eq('id', editItem.id).select().single();
+            if (error) { setSaveError('Erro ao atualizar medicamento. Tente novamente.'); console.error('[saveMedication] update error:', error); setLoading(false); return; }
             if (updated) setMedications((prev) => prev.map((m) => m.id === updated.id ? updated : m));
         } else {
-            const { data: created } = await (supabase.from('medications') as any).insert(data).select().single();
+            const { data: created, error } = await (supabase.from('medications') as any).insert(data).select().single();
+            if (error) { setSaveError('Erro ao salvar medicamento. Tente novamente.'); console.error('[saveMedication] insert error:', error); setLoading(false); return; }
             if (created) setMedications((prev) => [created, ...prev]);
         }
         setLoading(false);
@@ -359,6 +377,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
         setWeightForm({ date: new Date().toISOString().split('T')[0], weight_kg: '', notes: '' });
         setParasiteForm({ type: 'flea_tick', date: new Date().toISOString().split('T')[0], next_due_date: '', medication_name: '', weight_at_time_kg: '', notes: '' });
         setMedForm({ medication_name: '', dosage: '', frequency: '', start_date: new Date().toISOString().split('T')[0], end_date: '', active: true, notes: '' });
+        setSaveError(null);
     }
 
     return (
@@ -846,11 +865,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 <DocumentUpload petId={pet.id} mode="vaccination" existingDocs={vaccDocs} onDone={setVaccDocs} />
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={saveVaccination} disabled={loading || !vaccForm.vaccine_name || !vaccForm.date}>
-                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
-                            </button>
+                        <div className="modal-footer" style={{ flexDirection: 'column', gap: 'var(--space-3)' }}>
+                            {saveError && <div className="alert alert-danger" style={{ width: '100%', textAlign: 'center' }}>⚠️ {saveError}</div>}
+                            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', width: '100%' }}>
+                                <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
+                                <button className="btn btn-primary" onClick={saveVaccination} disabled={loading || !vaccForm.vaccine_name || !vaccForm.date}>
+                                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -960,11 +982,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={saveOccurrence} disabled={loading || !occurForm.date}>
-                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
-                            </button>
+                        <div className="modal-footer" style={{ flexDirection: 'column', gap: 'var(--space-3)' }}>
+                            {saveError && <div className="alert alert-danger" style={{ width: '100%', textAlign: 'center' }}>⚠️ {saveError}</div>}
+                            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', width: '100%' }}>
+                                <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
+                                <button className="btn btn-primary" onClick={saveOccurrence} disabled={loading || !occurForm.date}>
+                                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -993,11 +1018,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={saveWeight} disabled={loading || !weightForm.date || !weightForm.weight_kg}>
-                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
-                            </button>
+                        <div className="modal-footer" style={{ flexDirection: 'column', gap: 'var(--space-3)' }}>
+                            {saveError && <div className="alert alert-danger" style={{ width: '100%', textAlign: 'center' }}>⚠️ {saveError}</div>}
+                            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', width: '100%' }}>
+                                <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
+                                <button className="btn btn-primary" onClick={saveWeight} disabled={loading || !weightForm.date || !weightForm.weight_kg}>
+                                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1041,11 +1069,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={saveParasite} disabled={loading || !parasiteForm.date || !parasiteForm.medication_name}>
-                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
-                            </button>
+                        <div className="modal-footer" style={{ flexDirection: 'column', gap: 'var(--space-3)' }}>
+                            {saveError && <div className="alert alert-danger" style={{ width: '100%', textAlign: 'center' }}>⚠️ {saveError}</div>}
+                            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', width: '100%' }}>
+                                <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
+                                <button className="btn btn-primary" onClick={saveParasite} disabled={loading || !parasiteForm.date || !parasiteForm.medication_name}>
+                                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1090,11 +1121,14 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={saveMedication} disabled={loading || !medForm.start_date || !medForm.medication_name || !medForm.dosage}>
-                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
-                            </button>
+                        <div className="modal-footer" style={{ flexDirection: 'column', gap: 'var(--space-3)' }}>
+                            {saveError && <div className="alert alert-danger" style={{ width: '100%', textAlign: 'center' }}>⚠️ {saveError}</div>}
+                            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', width: '100%' }}>
+                                <button className="btn btn-secondary" onClick={() => setShowModal(null)}>Cancelar</button>
+                                <button className="btn btn-primary" onClick={saveMedication} disabled={loading || !medForm.start_date || !medForm.medication_name || !medForm.dosage}>
+                                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

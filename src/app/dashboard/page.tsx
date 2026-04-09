@@ -7,6 +7,8 @@ import { parseLocalDate, formatDate, formatCurrency } from '@/lib/dateUtils';
 import { generatePetAlerts } from '@/lib/petAlerts';
 import { canSeeAlerts } from '@/lib/planFeatures';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
