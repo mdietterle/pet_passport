@@ -1,8 +1,8 @@
-// File: C:\Users\martim.dietterle\Documents\Projetos\pet_passport\src\app\login\page.tsx
-import * as entry from '../../../../src/app/login/page.js'
+// File: C:\Users\martim.dietterle\Documents\Projetos\pet_passport\src\app\dashboard\profile\page.tsx
+import * as entry from '../../../../../src/app/dashboard/profile/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../src/app/login/page.js')
+type TEntry = typeof import('../../../../../src/app/dashboard/profile/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{
