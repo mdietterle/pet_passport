@@ -125,9 +125,14 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
       <style>{`
         .plans-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           gap: var(--space-5);
           margin-bottom: var(--space-8);
+        }
+        @media (max-width: 600px) {
+          .plans-grid {
+            grid-template-columns: 1fr;
+          }
         }
         .plan-card {
           background: var(--color-bg-secondary);

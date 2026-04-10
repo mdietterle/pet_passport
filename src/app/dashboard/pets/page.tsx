@@ -124,6 +124,11 @@ export default async function PetsPage() {
           grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
           gap: var(--space-4);
         }
+        @media (max-width: 600px) {
+          .pets-grid {
+            grid-template-columns: 1fr;
+          }
+        }
         .pet-card {
           background: var(--color-bg-secondary);
           border: 1px solid var(--color-border);
