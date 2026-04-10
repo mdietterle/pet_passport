@@ -102,6 +102,7 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 body {
@@ -110,6 +111,7 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 a {
@@ -810,7 +812,7 @@ tbody tr:hover {
   }
 
   .sidebar {
-    display: none;
+    display: none !important;
   }
 
   .main-content {
