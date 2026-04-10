@@ -2,6 +2,6 @@
   "/register/page": "app/register/page.js",
   "/page": "app/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/plans/page": "app/dashboard/plans/page.js",
-  "/dashboard/pets/page": "app/dashboard/pets/page.js"
+  "/dashboard/pets/page": "app/dashboard/pets/page.js",
+  "/dashboard/plans/page": "app/dashboard/plans/page.js"
 }
