@@ -267,7 +267,7 @@ export default async function DashboardPage() {
 
             {/* Stats */}
             <div className="stats-grid">
-                <div className="stat-card">
+                <Link href="/dashboard/pets" className="stat-card stat-card-link">
                     <div className="stat-icon stat-icon-orange">
                         <PawPrint size={22} />
                     </div>
@@ -275,8 +275,9 @@ export default async function DashboardPage() {
                         <div className="stat-value">{petCount}</div>
                         <div className="stat-label">Pets cadastrados</div>
                     </div>
-                </div>
-                <div className="stat-card">
+                    <ArrowRight size={16} className="stat-arrow" />
+                </Link>
+                <Link href="#secao-vacinas" className="stat-card stat-card-link">
                     <div className="stat-icon stat-icon-gold">
                         <Syringe size={22} />
                     </div>
@@ -284,8 +285,9 @@ export default async function DashboardPage() {
                         <div className="stat-value">{upcomingVaccinations.length}</div>
                         <div className="stat-label">Vacinas nos próximos 30 dias</div>
                     </div>
-                </div>
-                <div className="stat-card">
+                    <ArrowRight size={16} className="stat-arrow" />
+                </Link>
+                <Link href="#secao-ocorrencias" className="stat-card stat-card-link">
                     <div className="stat-icon stat-icon-primary">
                         <AlertCircle size={22} />
                     </div>
@@ -293,7 +295,8 @@ export default async function DashboardPage() {
                         <div className="stat-value">{recentOccurrences.length}</div>
                         <div className="stat-label">Ocorrências recentes</div>
                     </div>
-                </div>
+                    <ArrowRight size={16} className="stat-arrow" />
+                </Link>
             </div>
 
             <div className="dashboard-grid">
@@ -332,7 +335,7 @@ export default async function DashboardPage() {
                 </div>
 
                 {/* Upcoming Vaccinations */}
-                <div className="card">
+                <div id="secao-vacinas" className="card">
                     <div className="card-header">
                         <h2 className="card-title">Vacinas Próximas</h2>
                         <Syringe size={18} style={{ color: 'var(--color-gold-light)' }} />
@@ -351,7 +354,7 @@ export default async function DashboardPage() {
                                 const now = new Date();
                                 const daysLeft = due ? Math.ceil((due.getTime() - now.setHours(0, 0, 0, 0)) / 86400000) : 0;
                                 return (
-                                    <div key={v.id} className="vacc-item">
+                                    <Link key={v.id} href={`/dashboard/pets/${v.pet_id}`} className="vacc-item vacc-item-link">
                                         <div>
                                             <div className="vacc-name">{v.vaccine_name}</div>
                                             <div className="vacc-pet">{(v.pets as any)?.name}</div>
@@ -359,7 +362,7 @@ export default async function DashboardPage() {
                                         <span className={`badge ${daysLeft <= 7 ? 'badge-danger' : 'badge-gold'}`}>
                                             {daysLeft === 0 ? 'Hoje' : `${daysLeft}d`}
                                         </span>
-                                    </div>
+                                    </Link>
                                 );
                             })}
 
@@ -369,7 +372,7 @@ export default async function DashboardPage() {
                                 const now = new Date();
                                 const daysLeft = due ? Math.ceil((due.getTime() - now.setHours(0, 0, 0, 0)) / 86400000) : 0;
                                 return (
-                                    <div key={`para-${p.id}`} className="vacc-item">
+                                    <Link key={`para-${p.id}`} href={`/dashboard/pets/${p.pet_id}`} className="vacc-item vacc-item-link">
                                         <div>
                                             <div className="vacc-name">
                                                 <ShieldPlus size={14} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 4, color: 'var(--color-text-secondary)' }} />
@@ -380,87 +383,9 @@ export default async function DashboardPage() {
                                         <span className={`badge ${daysLeft <= 7 ? 'badge-danger' : 'badge-gold'}`}>
                                             {daysLeft === 0 ? 'Hoje' : `${daysLeft}d`}
                                         </span>
-                                    </div>
+                                    </Link>
                                 );
                             })}
-                        </div>
-                    )}
-                </div>
-
-                {/* Rotinas Medicas Ativas (Aparece se houver) */}
-                {activeMedications.length > 0 && (
-                    <div className="card" style={{ gridColumn: '1 / -1' }}>
-                        <div className="card-header">
-                            <h2 className="card-title">Tratamentos Ativos</h2>
-                            <Pill size={18} style={{ color: 'var(--color-orange)' }} />
-                        </div>
-                        <div className="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Pet</th>
-                                        <th>Remédio</th>
-                                        <th>Dosagem / Frequência</th>
-                                        <th>Início</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {activeMedications.map((m) => (
-                                        <tr key={m.id}>
-                                            <td>{(m.pets as any)?.name}</td>
-                                            <td style={{ fontWeight: 600 }}>{m.medication_name}</td>
-                                            <td style={{ color: 'var(--color-text-secondary)' }}>
-                                                {m.dosage} {m.frequency ? `(${m.frequency})` : ''}
-                                            </td>
-                                            <td style={{ color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
-                                                {formatDate(m.start_date)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-
-                <div className="card" style={{ gridColumn: '1 / -1' }}>
-                    <div className="card-header">
-                        <h2 className="card-title">Ocorrências Recentes</h2>
-                        <Link href="/dashboard/pets" className="btn btn-ghost btn-sm">
-                            Ver pets <ArrowRight size={14} />
-                        </Link>
-                    </div>
-                    {recentOccurrences.length === 0 ? (
-                        <div className="empty-state" style={{ padding: 'var(--space-6) 0' }}>
-                            <div className="empty-state-icon">📋</div>
-                            <p className="empty-state-title">Nenhuma ocorrência registrada</p>
-                        </div>
-                    ) : (
-                        <div className="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Pet</th>
-                                        <th>Tipo</th>
-                                        <th>Descrição</th>
-                                        <th>Data</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {recentOccurrences.map((o, idx) => (
-                                        <tr key={`${o.id}-${idx}`}>
-                                            <td>{(o.pets as any)?.name}</td>
-                                            <td style={{ textTransform: 'capitalize' }}>
-                                                {o.itemType === 'vet_consultation' ? 'Consulta Veterinária' : (o.itemType ? o.itemType.replace('_', ' ') : 'Indefinido')}
-                                            </td>
-                                            <td style={{ color: 'var(--color-text-secondary)' }}>{o.itemDesc || '—'}</td>
-                                            <td style={{ color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
-                                                {formatDate(o.date)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
                         </div>
                     )}
                 </div>
@@ -527,6 +452,94 @@ export default async function DashboardPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Rotinas Medicas Ativas (Aparece se houver) */}
+                {activeMedications.length > 0 && (
+                    <div className="card" style={{ gridColumn: '1 / -1' }}>
+                        <div className="card-header">
+                            <h2 className="card-title">Tratamentos Ativos</h2>
+                            <Pill size={18} style={{ color: 'var(--color-orange)' }} />
+                        </div>
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Pet</th>
+                                        <th>Remédio</th>
+                                        <th>Dosagem / Frequência</th>
+                                        <th>Início</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {activeMedications.map((m) => (
+                                        <tr key={m.id}>
+                                            <td>{(m.pets as any)?.name}</td>
+                                            <td style={{ fontWeight: 600 }}>{m.medication_name}</td>
+                                            <td style={{ color: 'var(--color-text-secondary)' }}>
+                                                {m.dosage} {m.frequency ? `(${m.frequency})` : ''}
+                                            </td>
+                                            <td style={{ color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+                                                {formatDate(m.start_date)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                <div id="secao-ocorrencias" className="card" style={{ gridColumn: '1 / -1' }}>
+                    <div className="card-header">
+                        <h2 className="card-title">Ocorrências Recentes</h2>
+                        <Link href="/dashboard/pets" className="btn btn-ghost btn-sm">
+                            Ver pets <ArrowRight size={14} />
+                        </Link>
+                    </div>
+                    {recentOccurrences.length === 0 ? (
+                        <div className="empty-state" style={{ padding: 'var(--space-6) 0' }}>
+                            <div className="empty-state-icon">📋</div>
+                            <p className="empty-state-title">Nenhuma ocorrência registrada</p>
+                        </div>
+                    ) : (
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Pet</th>
+                                        <th>Tipo</th>
+                                        <th>Descrição</th>
+                                        <th>Data</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {recentOccurrences.map((o, idx) => (
+                                        <tr key={`${o.id}-${idx}`} className="occurrences-row">
+                                            <td>{(o.pets as any)?.name}</td>
+                                            <td style={{ textTransform: 'capitalize' }}>
+                                                {o.itemType === 'vet_consultation' ? 'Consulta Veterinária' : (o.itemType ? o.itemType.replace('_', ' ') : 'Indefinido')}
+                                            </td>
+                                            <td style={{ color: 'var(--color-text-secondary)' }}>{o.itemDesc || '—'}</td>
+                                            <td style={{ color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+                                                {formatDate(o.date)}
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                <Link
+                                                    href={`/dashboard/pets/${o.pet_id}`}
+                                                    className="btn btn-ghost btn-icon btn-sm"
+                                                    title="Ver pet"
+                                                >
+                                                    <ArrowRight size={14} />
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <style>{`
@@ -651,6 +664,42 @@ export default async function DashboardPage() {
           height: 100%;
           border-radius: var(--radius-full);
           transition: width 0.5s ease-out;
+        }
+        .stat-card-link {
+          cursor: pointer;
+          text-decoration: none;
+          transition: all var(--transition-fast);
+          position: relative;
+        }
+        .stat-card-link:hover {
+          border-color: var(--color-orange);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+        .stat-arrow {
+          margin-left: auto;
+          color: var(--color-text-muted);
+          transition: transform var(--transition-fast);
+        }
+        .stat-card-link:hover .stat-arrow {
+          transform: translateX(4px);
+          color: var(--color-orange);
+        }
+        .vacc-item-link {
+          text-decoration: none;
+          cursor: pointer;
+          transition: background var(--transition-fast), border-color var(--transition-fast);
+          border: 1px solid transparent;
+        }
+        .vacc-item-link:hover {
+          background: rgba(13,148,136,0.1);
+          border-color: var(--color-orange);
+        }
+        .occurrences-row {
+          cursor: pointer;
+        }
+        .occurrences-row:hover td {
+          background: rgba(13,148,136,0.06);
         }
         @media (max-width: 768px) {
           .stats-grid { grid-template-columns: 1fr; }
