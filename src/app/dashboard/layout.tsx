@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import RenewalBanner from '@/components/layout/RenewalBanner';
+import BottomNav from '@/components/BottomNav';
 
 export default async function DashboardLayout({
     children,
@@ -52,6 +53,8 @@ export default async function DashboardLayout({
                 />
                 {children}
             </main>
+            <BottomNav />
         </div>
     );
+
 }

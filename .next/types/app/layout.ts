@@ -1,4 +1,4 @@
-// File: C:\Users\martim.dietterle\Documents\pet_passport\src\app\layout.tsx
+// File: C:\Users\martim.dietterle\Documents\Projetos\pet_passport\src\app\layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getInitials } from '@/lib/userUtils';
 import { PLAN_COLORS, PLAN_ICONS } from '@/lib/planUtils';
 import { generatePetAlerts, type PetAlert } from '@/lib/petAlerts';
+import { PawPrint } from 'lucide-react';
 import {
     Bell,
     User,
@@ -46,9 +47,27 @@ function notifClassFor(severity: PetAlert['severity']) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+const PAGE_TITLES: Record<string, string> = {
+    '/dashboard': 'Dashboard',
+    '/dashboard/pets': 'Meus Pets',
+    '/dashboard/plans': 'Planos',
+    '/dashboard/profile': 'Perfil',
+};
+
+function getPageTitle(pathname: string): string {
+    if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+    if (pathname.startsWith('/dashboard/pets/') && pathname.endsWith('/edit')) return 'Editar Pet';
+    if (pathname.startsWith('/dashboard/pets/') && pathname.endsWith('/report')) return 'Relatório';
+    if (pathname.startsWith('/dashboard/pets/new')) return 'Novo Pet';
+    if (pathname.startsWith('/dashboard/pets/')) return 'Detalhes do Pet';
+    return 'Pet Passport';
+}
+
 export default function TopBar() {
     const router = useRouter();
+    const pathname = usePathname();
     const supabase = createClient();
+    const pageTitle = getPageTitle(pathname);
 
     const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
     const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -138,7 +157,12 @@ export default function TopBar() {
 
     return (
         <header className="topbar">
-            <div className="topbar-left" />
+            <div className="topbar-left">
+                <Link href="/dashboard" className="topbar-mobile-logo" aria-label="Início">
+                    <div className="topbar-mobile-logo-icon"><PawPrint size={16} /></div>
+                    <span className="topbar-mobile-page-title">{pageTitle}</span>
+                </Link>
+            </div>
 
             <div className="topbar-right">
                 {/* ── Bell ── */}

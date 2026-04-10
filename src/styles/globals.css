@@ -809,8 +809,14 @@ tbody tr:hover {
     --sidebar-width: 0px;
   }
 
+  .sidebar {
+    display: none;
+  }
+
   .main-content {
     margin-left: 0;
+    /* Space for the fixed bottom nav bar */
+    padding-bottom: 76px;
   }
 
   .page-container {
@@ -824,6 +830,27 @@ tbody tr:hover {
 
   .modal {
     padding: var(--space-5);
+  }
+
+  /* Feature gate cards: stack vertically on mobile */
+  .feature-gate-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .feature-gate-card > a,
+  .feature-gate-card > button {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* PDF export card: stack on mobile */
+  .card[style*="align-items: center"] {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: var(--space-4);
   }
 }
 
@@ -1692,5 +1719,118 @@ tbody tr:hover {
   .topbar {
     left: 0;
     padding: 0 var(--space-4);
+  }
+}
+
+/* ============================================================
+   TOP BAR — Mobile Logo
+   ============================================================ */
+.topbar-mobile-logo {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.topbar-mobile-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--color-orange), var(--color-orange-dark));
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.topbar-mobile-page-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+@media (max-width: 768px) {
+  .topbar-mobile-logo {
+    display: flex;
+  }
+}
+
+/* ============================================================
+   BOTTOM NAV (mobile only)
+   ============================================================ */
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* Safe area for iPhone home indicator */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: var(--space-2) var(--space-1);
+    transition: color var(--transition-fast);
+    position: relative;
+  }
+
+  .bottom-nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 32px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-orange), var(--color-orange-dark));
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    transition: transform var(--transition-fast);
+  }
+
+  .bottom-nav-item.active {
+    color: var(--color-orange);
+  }
+
+  .bottom-nav-item.active::before {
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  .bottom-nav-icon {
+    transition: transform var(--transition-fast);
+  }
+
+  .bottom-nav-item.active .bottom-nav-icon {
+    transform: translateY(-2px);
+  }
+
+  .bottom-nav-label {
+    line-height: 1;
   }
 }
