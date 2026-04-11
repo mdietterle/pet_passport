@@ -19,7 +19,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
     const photoInputRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState({
         name: '', species: 'dog', breed: '', birth_date: '', sex: 'unknown',
-        weight_kg: '', microchip: '', color: '', notes: '', is_neutered: false,
+        weight_kg: '', microchip: '', color: '', notes: '', emergency_contact: '', is_neutered: false,
     });
 
     useEffect(() => {
@@ -51,6 +51,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
                 microchip: data.microchip || '',
                 color: data.color || '',
                 notes: data.notes || '',
+                emergency_contact: data.emergency_contact || '',
                 is_neutered: data.is_neutered || false,
             });
             setPhotoUrl(data.photo_url || null);
@@ -110,6 +111,7 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
             birth_date: form.birth_date || null, sex: form.sex as any,
             weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
             microchip: form.microchip || null, color: form.color || null, notes: form.notes || null,
+            emergency_contact: form.emergency_contact || null,
             is_neutered: form.is_neutered,
         }).eq('id', params.id);
         if (err) { setError('Erro ao salvar. Tente novamente.'); setLoading(false); }
@@ -225,6 +227,13 @@ export default function EditPetPage({ params }: { params: { id: string } }) {
                             <input name="microchip" className="form-input" value={form.microchip} onChange={handleChange} />
                         </div>
 
+                        <div className="form-group form-full">
+                            <label className="form-label">Telefone de contato (emergência)</label>
+                            <input name="emergency_contact" type="tel" className="form-input" placeholder="Ex: (11) 99999-9999" value={form.emergency_contact} onChange={handleChange} />
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                                Aparecerá no perfil público do QR Code para quem encontrar o pet.
+                            </span>
+                        </div>
 
                         <div className="form-group form-full">
                             <label className="form-label">Observações</label>

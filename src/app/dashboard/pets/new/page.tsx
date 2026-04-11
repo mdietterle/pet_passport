@@ -24,6 +24,7 @@ export default function NewPetPage() {
         microchip: '',
         color: '',
         notes: '',
+        emergency_contact: '',
         is_neutered: false,
     });
 
@@ -74,6 +75,7 @@ export default function NewPetPage() {
             microchip: form.microchip || null,
             color: form.color || null,
             notes: form.notes || null,
+            emergency_contact: form.emergency_contact || null,
             is_neutered: form.is_neutered,
         }).select().single();
 
@@ -166,6 +168,13 @@ export default function NewPetPage() {
                             <input id="microchip" name="microchip" className="form-input" placeholder="Número do microchip" value={form.microchip} onChange={handleChange} />
                         </div>
 
+                        <div className="form-group form-full">
+                            <label className="form-label" htmlFor="emergency_contact">Telefone de contato (emergência)</label>
+                            <input id="emergency_contact" name="emergency_contact" type="tel" className="form-input" placeholder="Ex: (11) 99999-9999" value={form.emergency_contact} onChange={handleChange} />
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                                Aparecerá no perfil público do QR Code para quem encontrar o pet.
+                            </span>
+                        </div>
 
                         <div className="form-group form-full">
                             <label className="form-label" htmlFor="notes">Observações</label>
