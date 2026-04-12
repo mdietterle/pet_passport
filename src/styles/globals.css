@@ -169,6 +169,8 @@ img {
   width: 100%;
   overflow-x: hidden;
   position: relative;
+  /* Ensure layout itself never creates horizontal scrollbar */
+  max-width: 100vw;
 }
 
 .main-content {
@@ -178,6 +180,10 @@ img {
   display: flex;
   flex-direction: column;
   padding-top: var(--topbar-height);
+  /* Prevent child content from causing horizontal overflow */
+  overflow-x: hidden;
+  min-width: 0;
+  width: 100%;
 }
 
 .page-container {
@@ -185,11 +191,17 @@ img {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  /* Contain overflow from grids/tables */
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .page-container {
     padding: var(--space-4);
+    /* Prevent horizontal scroll from padding */
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }
 
@@ -465,6 +477,9 @@ img {
   overflow-x: auto;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+  /* Ensure it doesn't escape the card */
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -832,10 +847,17 @@ tbody tr:hover {
     margin-left: 0;
     /* Space for the fixed bottom nav bar */
     padding-bottom: 76px;
+    /* Critical: prevent horizontal overflow on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
 
   .page-container {
     padding: var(--space-4);
+    /* Prevent content from bleeding past viewport */
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .form-grid,
@@ -866,6 +888,19 @@ tbody tr:hover {
     flex-direction: column;
     align-items: flex-start !important;
     gap: var(--space-4);
+  }
+
+  /* Ensure cards never overflow viewport */
+  .card {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Cards inside grids need min-width: 0 to not overflow */
+  .stats-grid > *,
+  .dashboard-grid > *,
+  .pets-mini-grid > * {
+    min-width: 0;
   }
 }
 

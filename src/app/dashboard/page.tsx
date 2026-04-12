@@ -2,10 +2,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Database } from '@/lib/supabase/types';
-import { PawPrint, Syringe, AlertCircle, Plus, ArrowRight, Wallet, Activity, ShieldPlus, Pill, Bell, Lock } from 'lucide-react';
+import { PawPrint, Syringe, AlertCircle, Plus, ArrowRight, Wallet, Activity, ShieldPlus, Pill } from 'lucide-react';
 import { parseLocalDate, formatDate, formatCurrency } from '@/lib/dateUtils';
-import { generatePetAlerts } from '@/lib/petAlerts';
-import { canSeeAlerts } from '@/lib/planFeatures';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,30 +118,7 @@ export default async function DashboardPage() {
         allOccurrences = occursData as any[] || [];
     }
 
-    // ─── Smart Alerts (Basic+ only) ───────────────────────────────────────────
     const plan = (profile as any)?.plans;
-    let smartAlerts: any[] = [];
-    if (canSeeAlerts(plan) && (pets || []).length > 0) {
-        // Fetch all vaccinations and weights for each pet (for alert engine)
-        const [{ data: allVaccsRaw }, { data: allWeightsRaw }] = await Promise.all([
-            (supabase.from('vaccinations') as any).select('pet_id, date').in('pet_id', petIds),
-            (supabase.from('pet_weights') as any).select('pet_id, date').in('pet_id', petIds),
-        ]);
-        const allVaccs: any[] = allVaccsRaw || [];
-        const allWeights: any[] = allWeightsRaw || [];
-
-        for (const pet of (pets || [])) {
-            const petVaccs = allVaccs.filter(v => v.pet_id === pet.id);
-            const petWeights = allWeights.filter(w => w.pet_id === pet.id);
-            const alerts = generatePetAlerts(pet, petVaccs, petWeights);
-            smartAlerts.push(...alerts);
-        }
-        // Deduplicate by message and cap at 5
-        const seen = new Set<string>();
-        smartAlerts = smartAlerts
-            .filter(a => { const key = `${a.petId}-${a.message}`; if (seen.has(key)) return false; seen.add(key); return true; })
-            .slice(0, 5);
-    }
 
     // --- AGREGANDO DESPESAS ---
     // Agregação por Pet
@@ -230,38 +205,6 @@ export default async function DashboardPage() {
                             Fazer upgrade
                         </Link>
                     )}
-                </div>
-            )}
-
-            {/* Smart Alerts — Basic+ */}
-            {canSeeAlerts(plan) && smartAlerts.length > 0 && (
-                <div className="alerts-section">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
-                        <Bell size={16} style={{ color: 'var(--color-gold-light)' }} />
-                        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alertas de Saúde</span>
-                    </div>
-                    {smartAlerts.map((alert, i) => (
-                        <div key={i} className={`alert-card alert-${alert.severity}`}>
-                            <div className="alert-icon">{alert.icon}</div>
-                            <div className="alert-body">
-                                <div className="alert-message">{alert.message}</div>
-                                <div className="alert-tip">{alert.tip}</div>
-                            </div>
-                            <Link href={`/dashboard/pets/${alert.petId}`} className="btn btn-ghost btn-sm" style={{ flexShrink: 0 }}>Ver pet</Link>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Teaser for Free plan users */}
-            {!canSeeAlerts(plan) && (pets || []).length > 0 && (
-                <div className="alert-card alert-info" style={{ marginBottom: 'var(--space-5)', alignItems: 'center' }}>
-                    <div className="alert-icon"><Lock size={18} /></div>
-                    <div className="alert-body">
-                        <div className="alert-message">Alertas Inteligentes disponíveis no plano Basic ou superior</div>
-                        <div className="alert-tip">Receba dicas personalizadas sobre saúde baseadas na espécie, raça e idade dos seus pets.</div>
-                    </div>
-                    <Link href="/dashboard/plans" className="btn btn-primary btn-sm" style={{ flexShrink: 0 }}>Upgrade</Link>
                 </div>
             )}
 
