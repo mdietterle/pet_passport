@@ -37,7 +37,8 @@ export default async function PetsPage() {
     const plan = (profile as any)?.plans;
     const petCount = pets?.length || 0;
     // If plan is null (plan_id not set yet), allow adding pets
-    const canAddPet = !plan || plan.max_pets === null || petCount < plan.max_pets;
+    // Allow adding if: no plan, unlimited pets (null/undefined/0), or under limit
+    const canAddPet = !plan || !plan.max_pets || petCount < plan.max_pets;
     const editableIds = getEditablePetIds(plan, pets || []);
 
     return (

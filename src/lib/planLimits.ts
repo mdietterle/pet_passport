@@ -18,7 +18,7 @@ export function checkPlanLimits(
     currentConsultationCount: number,
     currentOccurrenceCount: number
 ): PlanLimits {
-    const canAddPet = plan.max_pets === null || currentPetCount < plan.max_pets;
+    const canAddPet = !plan.max_pets || currentPetCount < plan.max_pets;
     const canAddVaccination =
         plan.max_vaccinations_per_pet === null ||
         currentVaccinationCount < plan.max_vaccinations_per_pet;

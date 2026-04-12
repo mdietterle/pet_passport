@@ -55,9 +55,9 @@ export default function NewPetPage() {
             profile = retryProfile;
         }
         const plan = profile?.plans;
-        if (plan && plan.max_pets !== null) {
+        if (plan && plan.max_pets && plan.max_pets > 0) {
             const { count } = await supabase.from('pets').select('*', { count: 'exact', head: true }).eq('owner_id', user.id).eq('is_active', true);
-            if (count !== null && count >= plan.max_pets) {
+            if (typeof count === 'number' && count >= plan.max_pets) {
                 setError(`Limite de ${plan.max_pets} pet(s) atingido no seu plano. Faça upgrade para adicionar mais.`);
                 setLoading(false);
                 return;

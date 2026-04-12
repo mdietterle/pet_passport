@@ -1,12 +1,21 @@
 -- ============================================================
--- Migration: Public Profile RLS
+-- Migration: Public Profile RLS + Profiles INSERT policy
 -- Date: 2026-04-11
 -- Description:
---   Permite leitura anônima de pets (e suas vacinas/medicações)
---   quando public_profile_enabled = true. Sem isto, a página
---   pública /pet/[token] retorna 404 porque o cliente anon
---   não consegue ler os dados através do RLS padrão.
+--   1. Permite leitura anônima de pets (e suas vacinas/medicações)
+--      quando public_profile_enabled = true. Sem isto, a página
+--      pública /pet/[token] retorna 404 porque o cliente anon
+--      não consegue ler os dados através do RLS padrão.
+--   2. Adiciona policy de INSERT no profiles para que o fallback
+--      de criação de perfil funcione caso o trigger falhe.
 -- ============================================================
+
+-- profiles: permite que o próprio usuário crie seu perfil (fallback do trigger)
+drop policy if exists "Users can insert own profile" on profiles;
+create policy "Users can insert own profile"
+  on profiles
+  for insert
+  with check (auth.uid() = id);
 
 -- pets: leitura pública quando o perfil público está ativado
 drop policy if exists "Anyone can view public pets" on pets;
