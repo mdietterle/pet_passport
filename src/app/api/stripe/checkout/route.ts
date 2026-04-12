@@ -1,36 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import Stripe from 'stripe';
+import { buildPaymentLinkUrl } from '@/lib/planUtils';
 
+/**
+ * POST /api/stripe/checkout
+ *
+ * Redirects the authenticated user to the correct Stripe Payment Link for
+ * the selected plan. The Payment Link is a professionally hosted Stripe page
+ * that includes the product name, description, price, and marketing features.
+ *
+ * Query params injected into the Stripe URL:
+ *  - prefilled_email  → pre-fills the customer e-mail field
+ *  - client_reference_id → links the purchase to the Supabase user ID
+ *    (consumed by the Stripe webhook to update the user's plan)
+ */
 export async function POST(request: NextRequest) {
     try {
         const supabase = createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
+
         if (authError || !user) {
-            console.error('Auth error in checkout:', authError);
-            return NextResponse.json({ error: 'Unauthorized', details: authError?.message }, { status: 401 });
+            console.error('[checkout] Auth error:', authError);
+            return NextResponse.json(
+                { error: 'Unauthorized', details: authError?.message },
+                { status: 401 },
+            );
         }
 
-        const formData = await request.formData();
-        const rawPlanId = formData.get('planId') as string;
-        const planId = rawPlanId?.trim();
+        // Accept both form-data (HTML <form> POST) and JSON
+        let planId: string | null = null;
+        const contentType = request.headers.get('content-type') ?? '';
+
+        if (contentType.includes('application/json')) {
+            const body = await request.json();
+            planId = body?.planId ?? null;
+        } else {
+            const formData = await request.formData();
+            planId = (formData.get('planId') as string | null)?.trim() ?? null;
+        }
 
         if (!planId) {
             return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
         }
 
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('full_name, tax_id, cellphone')
-            .eq('id', user.id)
-            .single();
-
-        if (profileError || !profile) {
-            console.error('Profile not found for user:', user.id, profileError);
-            return NextResponse.json({ error: 'User profile not found', details: profileError?.message }, { status: 404 });
-        }
-
-        // Fetch plan details from database
+        // Resolve plan details from Supabase
         const { data: planData, error: planError } = await supabase
             .from('plans')
             .select('*')
@@ -38,7 +51,7 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (planError || !planData) {
-            console.error('Plan not found:', planError);
+            console.error('[checkout] Plan not found:', planId, planError);
             return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
         }
 
@@ -48,22 +61,46 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Cannot checkout a free plan' }, { status: 400 });
         }
 
-        // Initialize Stripe
-        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-        if (!stripeSecretKey) {
-            console.error('STRIPE_SECRET_KEY is not defined in environment variables');
-            return NextResponse.json({ error: 'Payment gateway configuration error' }, { status: 500 });
+        // ──────────────────────────────────────────────────────────────────────
+        // PRIMARY PATH: redirect to the pre-configured Stripe Payment Link.
+        // The Payment Link is a professionally hosted Stripe page that already
+        // contains the product info, price and marketing features configured
+        // via the Stripe dashboard / MCP. We only need to append query params
+        // so Stripe can pre-fill the customer's email and tag the purchase with
+        // the Supabase user ID for the webhook to pick up.
+        // ──────────────────────────────────────────────────────────────────────
+        const paymentLinkUrl = buildPaymentLinkUrl(
+            plan.name,          // e.g. 'basic' | 'pro' | 'premium'
+            user.email,
+            user.id,
+        );
+
+        if (paymentLinkUrl) {
+            console.info('[checkout] Redirecting to Stripe Payment Link for plan:', plan.name);
+            return NextResponse.redirect(paymentLinkUrl, 303);
         }
 
+        // ──────────────────────────────────────────────────────────────────────
+        // FALLBACK PATH: create a dynamic Stripe Checkout Session.
+        // Used only if no Payment Link is registered for this plan.
+        // ──────────────────────────────────────────────────────────────────────
+        console.warn('[checkout] No Payment Link for plan, falling back to Checkout Session:', plan.name);
+
+        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+        if (!stripeSecretKey) {
+            console.error('[checkout] STRIPE_SECRET_KEY not set');
+            return NextResponse.json(
+                { error: 'Payment gateway configuration error' },
+                { status: 500 },
+            );
+        }
+
+        const Stripe = (await import('stripe')).default;
         const stripe = new Stripe(stripeSecretKey);
 
-        // Calculate amount in cents (e.g., 29.90 -> 2990)
         const amountInCents = Math.round(plan.price_brl * 100);
-
-        // Build domain URL
         const domainURL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-        // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -72,43 +109,46 @@ export async function POST(request: NextRequest) {
                         currency: 'brl',
                         product_data: {
                             name: `Plano ${plan.display_name}`,
-                            description: `Assinatura Pet Passport - ${plan.display_name}`,
+                            description: `Assinatura Pet Passport — ${plan.display_name}`,
                         },
                         unit_amount: amountInCents,
+                        recurring: { interval: 'month' },
                     },
                     quantity: 1,
                 },
             ],
-            mode: 'payment',
+            mode: 'subscription',
             success_url: `${domainURL}/dashboard/plans?stripe_success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${domainURL}/dashboard/plans?stripe_canceled=true`,
-            customer_email: user.email || undefined,
-            client_reference_id: user.id, // Good practice
+            customer_email: user.email ?? undefined,
+            client_reference_id: user.id,
             metadata: {
                 supabase_user_id: user.id,
                 plan_id: plan.id,
-                // Forcing generic identifier so webhook knows it's an app subscription
-                type: 'subscription_upgrade' 
-            }
+                type: 'subscription_upgrade',
+            },
         });
 
         if (session.url) {
             return NextResponse.redirect(session.url, 303);
-        } else {
-            return NextResponse.json({ error: 'Failed to create checkout session URL' }, { status: 500 });
         }
 
-        } catch (error: any) {
-        console.error('Stripe Checkout error detail:', {
+        return NextResponse.json(
+            { error: 'Failed to create checkout session URL' },
+            { status: 500 },
+        );
+    } catch (error: any) {
+        console.error('[checkout] Unexpected error:', {
             message: error.message,
-            stack: error.stack,
             type: error.type,
             code: error.code,
-            raw: error
         });
-        return NextResponse.json({
-            error: 'Internal server error',
-            details: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
-        }, { status: 500 });
+        return NextResponse.json(
+            {
+                error: 'Internal server error',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+            },
+            { status: 500 },
+        );
     }
 }
