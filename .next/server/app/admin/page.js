@@ -1,0 +1,56 @@
+(()=>{var e={};e.id=3,e.ids=[3],e.modules={47849:e=>{"use strict";e.exports=require("next/dist/client/components/action-async-storage.external")},72934:e=>{"use strict";e.exports=require("next/dist/client/components/action-async-storage.external.js")},55403:e=>{"use strict";e.exports=require("next/dist/client/components/request-async-storage.external")},54580:e=>{"use strict";e.exports=require("next/dist/client/components/request-async-storage.external.js")},94749:e=>{"use strict";e.exports=require("next/dist/client/components/static-generation-async-storage.external")},45869:e=>{"use strict";e.exports=require("next/dist/client/components/static-generation-async-storage.external.js")},20399:e=>{"use strict";e.exports=require("next/dist/compiled/next-server/app-page.runtime.prod.js")},41187:(e,t,s)=>{"use strict";s.r(t),s.d(t,{GlobalError:()=>l.a,__next_app__:()=>u,originalPathname:()=>m,pages:()=>o,routeModule:()=>h,tree:()=>d}),s(73716),s(7990),s(32029),s(35866);var r=s(23191),a=s(88716),i=s(37922),l=s.n(i),n=s(95231),c={};for(let e in n)0>["default","tree","pages","GlobalError","originalPathname","__next_app__","routeModule"].indexOf(e)&&(c[e]=()=>n[e]);s.d(t,c);let d=["",{children:["admin",{children:["__PAGE__",{},{page:[()=>Promise.resolve().then(s.bind(s,73716)),"C:\\Users\\martim.dietterle\\Documents\\Projetos\\pet_passport\\src\\app\\admin\\page.tsx"]}]},{layout:[()=>Promise.resolve().then(s.bind(s,7990)),"C:\\Users\\martim.dietterle\\Documents\\Projetos\\pet_passport\\src\\app\\admin\\layout.tsx"]}]},{layout:[()=>Promise.resolve().then(s.bind(s,32029)),"C:\\Users\\martim.dietterle\\Documents\\Projetos\\pet_passport\\src\\app\\layout.tsx"],"not-found":[()=>Promise.resolve().then(s.t.bind(s,35866,23)),"next/dist/client/components/not-found-error"]}],o=["C:\\Users\\martim.dietterle\\Documents\\Projetos\\pet_passport\\src\\app\\admin\\page.tsx"],m="/admin/page",u={require:s,loadChunk:()=>Promise.resolve()},h=new r.AppPageRouteModule({definition:{kind:a.x.APP_PAGE,page:"/admin/page",pathname:"/admin",bundlePath:"",filename:"",appPaths:[]},userland:{loaderTree:d}})},35303:()=>{},62881:(e,t,s)=>{"use strict";s.d(t,{Z:()=>c});var r=s(17577);/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let a=e=>e.replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase(),i=(...e)=>e.filter((e,t,s)=>!!e&&s.indexOf(e)===t).join(" ");/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */var l={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let n=(0,r.forwardRef)(({color:e="currentColor",size:t=24,strokeWidth:s=2,absoluteStrokeWidth:a,className:n="",children:c,iconNode:d,...o},m)=>(0,r.createElement)("svg",{ref:m,...l,width:t,height:t,stroke:e,strokeWidth:a?24*Number(s)/Number(t):s,className:i("lucide",n),...o},[...d.map(([e,t])=>(0,r.createElement)(e,t)),...Array.isArray(c)?c:[c]])),c=(e,t)=>{let s=(0,r.forwardRef)(({className:s,...l},c)=>(0,r.createElement)(n,{ref:c,iconNode:t,className:i(`lucide-${a(e)}`,s),...l}));return s.displayName=`${e}`,s}},76846:(e,t,s)=>{"use strict";s.d(t,{Z:()=>r});/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(62881).Z)("PawPrint",[["circle",{cx:"11",cy:"4",r:"2",key:"vol9p0"}],["circle",{cx:"18",cy:"8",r:"2",key:"17gozi"}],["circle",{cx:"20",cy:"16",r:"2",key:"1v9bxh"}],["path",{d:"M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z",key:"1ydw1z"}]])},90434:(e,t,s)=>{"use strict";s.d(t,{default:()=>a.a});var r=s(79404),a=s.n(r)},35047:(e,t,s)=>{"use strict";var r=s(77389);s.o(r,"usePathname")&&s.d(t,{usePathname:function(){return r.usePathname}}),s.o(r,"useRouter")&&s.d(t,{useRouter:function(){return r.useRouter}})},27162:(e,t,s)=>{"use strict";s.d(t,{Z:()=>c});var r=s(71159);/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let a=e=>e.replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase(),i=(...e)=>e.filter((e,t,s)=>!!e&&s.indexOf(e)===t).join(" ");/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */var l={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let n=(0,r.forwardRef)(({color:e="currentColor",size:t=24,strokeWidth:s=2,absoluteStrokeWidth:a,className:n="",children:c,iconNode:d,...o},m)=>(0,r.createElement)("svg",{ref:m,...l,width:t,height:t,stroke:e,strokeWidth:a?24*Number(s)/Number(t):s,className:i("lucide",n),...o},[...d.map(([e,t])=>(0,r.createElement)(e,t)),...Array.isArray(c)?c:[c]])),c=(e,t)=>{let s=(0,r.forwardRef)(({className:s,...l},c)=>(0,r.createElement)(n,{ref:c,iconNode:t,className:i(`lucide-${a(e)}`,s),...l}));return s.displayName=`${e}`,s}},26299:(e,t,s)=>{"use strict";s.d(t,{Z:()=>r});/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(27162).Z)("CreditCard",[["rect",{width:"20",height:"14",x:"2",y:"5",rx:"2",key:"ynyp8z"}],["line",{x1:"2",x2:"22",y1:"10",y2:"10",key:"1b3vmo"}]])},94290:(e,t,s)=>{"use strict";s.d(t,{Z:()=>r});/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(27162).Z)("PawPrint",[["circle",{cx:"11",cy:"4",r:"2",key:"vol9p0"}],["circle",{cx:"18",cy:"8",r:"2",key:"17gozi"}],["circle",{cx:"20",cy:"16",r:"2",key:"1v9bxh"}],["path",{d:"M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z",key:"1ydw1z"}]])},79585:(e,t,s)=>{"use strict";s.d(t,{Z:()=>r});/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(27162).Z)("ShieldCheck",[["path",{d:"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",key:"oel41y"}],["path",{d:"m9 12 2 2 4-4",key:"dzmm74"}]])},73716:(e,t,s)=>{"use strict";s.r(t),s.d(t,{default:()=>o});var r=s(19510),a=s(58585),i=s(65655),l=s(79585);/**
+ * @license lucide-react v0.400.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let n=(0,s(27162).Z)("Users",[["path",{d:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2",key:"1yyitq"}],["circle",{cx:"9",cy:"7",r:"4",key:"nufk8"}],["path",{d:"M22 21v-2a4 4 0 0 0-3-3.87",key:"kshegd"}],["path",{d:"M16 3.13a4 4 0 0 1 0 7.75",key:"1da9ce"}]]);var c=s(94290),d=s(26299);async function o(){let e=(0,i.e)(),{data:{user:t}}=await e.auth.getUser();t||(0,a.redirect)("/login");let[{count:s},{count:o},{data:m}]=await Promise.all([e.from("profiles").select("*",{count:"exact",head:!0}),e.from("pets").select("*",{count:"exact",head:!0}).eq("is_active",!0),e.from("plans").select("id, display_name, name").order("sort_order")]),u={};if(m)for(let t of m){let{count:s}=await e.from("profiles").select("*",{count:"exact",head:!0}).eq("plan_id",t.id);u[t.id]=s??0}return(0,r.jsxs)("div",{className:"page-container",children:[r.jsx("div",{className:"page-header",children:(0,r.jsxs)("div",{style:{display:"flex",alignItems:"center",gap:"var(--space-3)"},children:[r.jsx(l.Z,{size:24,style:{color:"#ef4444"}}),r.jsx("h1",{className:"page-title",children:"Painel Administrativo"})]})}),(0,r.jsxs)("div",{className:"stats-grid",style:{marginBottom:"var(--space-6)"},children:[(0,r.jsxs)("div",{className:"stat-card",children:[r.jsx("div",{className:"stat-icon",children:r.jsx(n,{size:20})}),r.jsx("div",{className:"stat-value",children:s??0}),r.jsx("div",{className:"stat-label",children:"Usu\xe1rios"})]}),(0,r.jsxs)("div",{className:"stat-card",children:[r.jsx("div",{className:"stat-icon",children:r.jsx(c.Z,{size:20})}),r.jsx("div",{className:"stat-value",children:o??0}),r.jsx("div",{className:"stat-label",children:"Pets ativos"})]}),(0,r.jsxs)("div",{className:"stat-card",children:[r.jsx("div",{className:"stat-icon",children:r.jsx(d.Z,{size:20})}),r.jsx("div",{className:"stat-value",children:m?.length??0}),r.jsx("div",{className:"stat-label",children:"Planos"})]})]}),(0,r.jsxs)("div",{className:"card",children:[r.jsx("div",{className:"card-header",children:r.jsx("h2",{className:"card-title",children:"Distribui\xe7\xe3o por Plano"})}),r.jsx("div",{className:"table-container",children:(0,r.jsxs)("table",{children:[r.jsx("thead",{children:(0,r.jsxs)("tr",{children:[r.jsx("th",{children:"Plano"}),r.jsx("th",{children:"Usu\xe1rios"}),r.jsx("th",{children:"% do total"})]})}),r.jsx("tbody",{children:(m??[]).map(e=>{let t=u[e.id]??0,a=s?Math.round(t/s*100):0;return(0,r.jsxs)("tr",{children:[r.jsx("td",{style:{fontWeight:600},children:e.display_name}),r.jsx("td",{children:t}),r.jsx("td",{children:(0,r.jsxs)("div",{style:{display:"flex",alignItems:"center",gap:"var(--space-3)"},children:[r.jsx("div",{className:"progress-bar",style:{flex:1,maxWidth:120},children:r.jsx("div",{className:"progress-fill",style:{width:`${a}%`}})}),(0,r.jsxs)("span",{style:{color:"var(--color-text-secondary)",fontSize:"0.85rem"},children:[a,"%"]})]})})]},e.id)})})]})})]})]})}}};var t=require("../../webpack-runtime.js");t.C(e);var s=e=>t(t.s=e),r=t.X(0,[948,336,355,471,404,823],()=>s(41187));module.exports=r})();

@@ -37,6 +37,14 @@ export function petAge(birthDate: string | null | undefined): string {
 }
 
 /**
+ * Parse a decimal string that may use comma as separator (pt-BR).
+ * "4,5" → 4.5 / "10.3" → 10.3 / "" → NaN
+ */
+export function parseDecimal(value: string): number {
+    return parseFloat(value.replace(',', '.'));
+}
+
+/**
  * Formats a number as BRL currency (R$ 0,00).
  */
 export function formatCurrency(value: number | null | undefined): string {

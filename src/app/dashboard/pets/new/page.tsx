@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { SPECIES_LABELS, SEX_LABELS } from '@/lib/planLimits';
+import { parseDecimal } from '@/lib/dateUtils';
 import RGAnimalBanner from '@/components/pets/RGAnimalBanner';
 
 export default function NewPetPage() {
@@ -71,7 +72,7 @@ export default function NewPetPage() {
             breed: form.breed || null,
             birth_date: form.birth_date || null,
             sex: form.sex as any,
-            weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
+            weight_kg: form.weight_kg ? Math.min(parseDecimal(form.weight_kg), 999.99) : null,
             microchip: form.microchip || null,
             color: form.color || null,
             notes: form.notes || null,
@@ -155,7 +156,7 @@ export default function NewPetPage() {
 
                         <div className="form-group">
                             <label className="form-label" htmlFor="weight_kg">Peso (kg)</label>
-                            <input id="weight_kg" name="weight_kg" type="number" step="0.1" min="0" className="form-input" placeholder="Ex: 4.5" value={form.weight_kg} onChange={handleChange} />
+                            <input id="weight_kg" name="weight_kg" type="text" inputMode="decimal" className="form-input" placeholder="Ex: 4,5" value={form.weight_kg} onChange={handleChange} />
                         </div>
 
                         <div className="form-group">

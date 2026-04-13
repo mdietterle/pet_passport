@@ -8,7 +8,7 @@ import { Plus, Trash2, Edit, Loader2, Syringe, Stethoscope, AlertCircle, X, Chec
 import type { Pet, Vaccination, VetConsultation, Occurrence, Plan, PetWeight, ParasiteControl, Medication, ExamAttachment, Treatment, TreatmentType, TreatmentStatus } from '@/lib/supabase/types';
 import { OCCURRENCE_TYPE_LABELS, checkPlanLimits } from '@/lib/planLimits';
 import { canUploadExams } from '@/lib/planFeatures';
-import { formatDate } from '@/lib/dateUtils';
+import { formatDate, parseDecimal } from '@/lib/dateUtils';
 import DocumentUpload, { type UploadedDoc, type PrescriptionData } from '@/components/DocumentUpload';
 
 const TREATMENT_TYPE_LABELS: Record<TreatmentType, string> = {
@@ -113,7 +113,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     async function saveConsultation() {
         setSaveError(null);
         setLoading(true);
-        const data = { pet_id: pet.id, date: consultForm.date, vet_name: consultForm.vet_name || null, clinic: consultForm.clinic || null, reason: consultForm.reason, diagnosis: consultForm.diagnosis || null, prescription: consultForm.prescription || null, cost_brl: consultForm.cost_brl ? parseFloat(consultForm.cost_brl) : null, follow_up_date: consultForm.follow_up_date || null, notes: consultForm.notes || null };
+        const data = { pet_id: pet.id, date: consultForm.date, vet_name: consultForm.vet_name || null, clinic: consultForm.clinic || null, reason: consultForm.reason, diagnosis: consultForm.diagnosis || null, prescription: consultForm.prescription || null, cost_brl: consultForm.cost_brl ? parseDecimal(consultForm.cost_brl) : null, follow_up_date: consultForm.follow_up_date || null, notes: consultForm.notes || null };
         let savedId: string | null = null;
         if (editItem) {
             const { data: updated, error } = await (supabase.from('vet_consultations') as any).update(data).eq('id', editItem.id).select().single();
@@ -157,7 +157,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     async function saveOccurrence() {
         setSaveError(null);
         setLoading(true);
-        const data = { pet_id: pet.id, type: occurForm.type as any, date: occurForm.date, description: occurForm.description || null, cost_brl: occurForm.cost_brl ? parseFloat(occurForm.cost_brl) : null, notes: occurForm.notes || null };
+        const data = { pet_id: pet.id, type: occurForm.type as any, date: occurForm.date, description: occurForm.description || null, cost_brl: occurForm.cost_brl ? parseDecimal(occurForm.cost_brl) : null, notes: occurForm.notes || null };
         if (editItem) {
             const { data: updated, error } = await (supabase.from('occurrences') as any).update(data).eq('id', editItem.id).select().single();
             if (error) { setSaveError('Erro ao atualizar ocorrência. Tente novamente.'); console.error('[saveOccurrence] update error:', error); setLoading(false); return; }
@@ -177,7 +177,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
     async function saveWeight() {
         setSaveError(null);
         setLoading(true);
-        const data = { pet_id: pet.id, date: weightForm.date, weight_kg: parseFloat(weightForm.weight_kg), notes: weightForm.notes || null };
+        const data = { pet_id: pet.id, date: weightForm.date, weight_kg: Math.min(parseDecimal(weightForm.weight_kg), 999.99), notes: weightForm.notes || null };
         if (editItem) {
             const { data: updated, error } = await (supabase.from('pet_weights') as any).update(data).eq('id', editItem.id).select().single();
             if (error) { setSaveError('Erro ao atualizar peso. Tente novamente.'); console.error('[saveWeight] update error:', error); setLoading(false); return; }
@@ -203,7 +203,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
             date: parasiteForm.date,
             next_due_date: parasiteForm.next_due_date || null,
             medication_name: parasiteForm.medication_name,
-            weight_at_time_kg: parasiteForm.weight_at_time_kg ? parseFloat(parasiteForm.weight_at_time_kg) : null,
+            weight_at_time_kg: parasiteForm.weight_at_time_kg ? Math.min(parseDecimal(parasiteForm.weight_at_time_kg), 999.99) : null,
             notes: parasiteForm.notes || null
         };
         if (editItem) {
@@ -905,7 +905,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Custo (R$)</label>
-                                    <input type="number" step="0.01" min="0" className="form-input" placeholder="0,00" value={consultForm.cost_brl} onChange={(e) => setConsultForm((p) => ({ ...p, cost_brl: e.target.value }))} />
+                                    <input type="text" inputMode="decimal" className="form-input" placeholder="0,00" value={consultForm.cost_brl} onChange={(e) => setConsultForm((p) => ({ ...p, cost_brl: e.target.value }))} />
                                 </div>
                                 <div className="form-group form-full">
                                     <label className="form-label">Motivo da consulta *</label>
@@ -974,7 +974,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Custo (R$)</label>
-                                    <input type="number" step="0.01" min="0" className="form-input" placeholder="0,00" value={occurForm.cost_brl} onChange={(e) => setOccurForm((p) => ({ ...p, cost_brl: e.target.value }))} />
+                                    <input type="text" inputMode="decimal" className="form-input" placeholder="0,00" value={occurForm.cost_brl} onChange={(e) => setOccurForm((p) => ({ ...p, cost_brl: e.target.value }))} />
                                 </div>
                                 <div className="form-group form-full">
                                     <label className="form-label">Observações</label>
@@ -1010,7 +1010,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Peso (kg) *</label>
-                                    <input type="number" step="0.01" min="0" className="form-input" placeholder="0.00" value={weightForm.weight_kg} onChange={(e) => setWeightForm((p) => ({ ...p, weight_kg: e.target.value }))} required />
+                                    <input type="text" inputMode="decimal" className="form-input" placeholder="0,00" value={weightForm.weight_kg} onChange={(e) => setWeightForm((p) => ({ ...p, weight_kg: e.target.value }))} required />
                                 </div>
                                 <div className="form-group form-full">
                                     <label className="form-label">Observações</label>
@@ -1061,7 +1061,7 @@ export default function PetTabs({ pet, vaccinations: initVacc, consultations: in
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Peso na hora (kg)</label>
-                                    <input type="number" step="0.01" min="0" className="form-input" placeholder="Peso serviu de base..." value={parasiteForm.weight_at_time_kg} onChange={(e) => setParasiteForm((p) => ({ ...p, weight_at_time_kg: e.target.value }))} />
+                                    <input type="text" inputMode="decimal" className="form-input" placeholder="Ex: 4,5" value={parasiteForm.weight_at_time_kg} onChange={(e) => setParasiteForm((p) => ({ ...p, weight_at_time_kg: e.target.value }))} />
                                 </div>
                                 <div className="form-group form-full">
                                     <label className="form-label">Observações</label>
