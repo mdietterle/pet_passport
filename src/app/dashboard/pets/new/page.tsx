@@ -80,7 +80,7 @@ export default function NewPetPage() {
         }).select().single();
 
         if (err) {
-            setError('Erro ao cadastrar pet. Tente novamente.');
+            setError(err.message || 'Erro ao cadastrar pet. Tente novamente.');
             setLoading(false);
         } else {
             router.push(`/dashboard/pets/${data.id}`);

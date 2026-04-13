@@ -20,7 +20,7 @@ export default async function DashboardLayout({
     // Ensure profile exists (fallback if auth trigger didn't fire)
     let { data: profile } = await supabase
         .from('profiles')
-        .select('payment_method, plan_expires_at, subscription_status')
+        .select('*')
         .eq('id', user.id)
         .single();
 
@@ -33,7 +33,7 @@ export default async function DashboardLayout({
         });
         const { data: retryProfile } = await supabase
             .from('profiles')
-            .select('payment_method, plan_expires_at, subscription_status')
+            .select('*')
             .eq('id', user.id)
             .single();
         profile = retryProfile;
