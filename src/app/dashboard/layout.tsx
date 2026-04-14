@@ -26,11 +26,11 @@ export default async function DashboardLayout({
 
     if (!profile) {
         const { data: freePlan } = await (supabase.from('plans') as any).select('id').eq('name', 'free').single();
-        await (supabase.from('profiles') as any).insert({
+        await (supabase.from('profiles') as any).upsert({
             id: user.id,
             full_name: user.user_metadata?.full_name || null,
             plan_id: freePlan?.id || null,
-        });
+        }, { onConflict: 'id' });
         const { data: retryProfile } = await supabase
             .from('profiles')
             .select('*')

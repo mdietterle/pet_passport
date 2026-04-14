@@ -47,13 +47,18 @@ export default function NewPetPage() {
         let { data: profile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
         if (!profile) {
             const { data: freePlan } = await (supabase.from('plans') as any).select('id').eq('name', 'free').single();
-            await (supabase.from('profiles') as any).insert({
+            await (supabase.from('profiles') as any).upsert({
                 id: user.id,
                 full_name: user.user_metadata?.full_name || null,
                 plan_id: freePlan?.id || null,
-            });
+            }, { onConflict: 'id' });
             const { data: retryProfile } = await supabase.from('profiles').select('*, plans(*)').eq('id', user.id).single() as any;
             profile = retryProfile;
+            if (!profile) {
+                setError('Não foi possível criar seu perfil. Tente sair e entrar novamente.');
+                setLoading(false);
+                return;
+            }
         }
         const plan = profile?.plans;
         if (plan && plan.max_pets && plan.max_pets > 0) {
