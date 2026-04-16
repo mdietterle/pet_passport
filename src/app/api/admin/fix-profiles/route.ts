@@ -1,16 +1,34 @@
+import { createClient } from '@/lib/supabase/server';
 import { getAdminClient } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rateLimit';
 
 /**
- * One-time admin endpoint to create missing profiles for users
- * whose auth trigger didn't fire.
+ * Admin endpoint to create missing profiles for users whose auth trigger
+ * didn't fire. Requires an authenticated session belonging to a user with
+ * `profiles.is_admin = true`.
  *
  * POST /api/admin/fix-profiles
- * Header: x-admin-key = SUPABASE_SERVICE_ROLE_KEY (as a simple auth check)
  */
-export async function POST(request: NextRequest) {
-    const adminKey = request.headers.get('x-admin-key');
-    if (adminKey !== process.env.SUPABASE_SERVICE_ROLE_KEY) {
+export async function POST(_request: NextRequest) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rl = rateLimit(`admin-fix:${user.id}`, 5, 60 * 1000);
+    if (!rl.ok) {
+        return NextResponse.json({ error: 'Muitas requisições' }, { status: 429 });
+    }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+    if (!(profile as any)?.is_admin) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -19,7 +37,8 @@ export async function POST(request: NextRequest) {
     // 1. Get all auth users
     const { data: { users }, error: usersErr } = await admin.auth.admin.listUsers();
     if (usersErr) {
-        return NextResponse.json({ error: usersErr.message }, { status: 500 });
+        console.error('[admin/fix-profiles] listUsers error:', usersErr);
+        return NextResponse.json({ error: 'Falha ao listar usuários' }, { status: 500 });
     }
 
     // 2. Get all existing profile IDs
@@ -53,12 +72,12 @@ export async function POST(request: NextRequest) {
     const { error: insertErr } = await (admin.from('profiles') as any).insert(toInsert);
 
     if (insertErr) {
-        return NextResponse.json({ error: insertErr.message }, { status: 500 });
+        console.error('[admin/fix-profiles] insert error:', insertErr);
+        return NextResponse.json({ error: 'Falha ao criar profiles' }, { status: 500 });
     }
 
     return NextResponse.json({
         message: `Profiles criados para ${missing.length} usuário(s)`,
         fixed: missing.length,
-        users: missing.map(u => ({ id: u.id, email: u.email })),
     });
 }

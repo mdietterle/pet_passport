@@ -1,15 +1,27 @@
 import { createClient } from '@/lib/supabase/server';
 import { getAdminClient } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rateLimit';
+import { validateFileContent, type AllowedKind } from '@/lib/fileValidation';
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+const ALLOWED_KINDS: AllowedKind[] = ['jpg', 'png', 'webp', 'heic'];
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_PHOTOS_PER_PET = 10;
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: NextRequest) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rl = rateLimit(`pet-photos:${user.id}`, 20, 60 * 1000);
+    if (!rl.ok) {
+        return NextResponse.json(
+            { error: 'Muitas requisições. Tente novamente em alguns instantes.' },
+            { status: 429, headers: { 'Retry-After': Math.ceil((rl.resetAt - Date.now()) / 1000).toString() } },
+        );
+    }
 
     // Check premium plan
     const { data: profile } = await supabase
@@ -31,6 +43,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'file e pet_id são obrigatórios' }, { status: 400 });
     }
 
+    if (!UUID_REGEX.test(petId)) {
+        return NextResponse.json({ error: 'pet_id inválido' }, { status: 400 });
+    }
+
     // Verify pet ownership
     const { data: pet } = await supabase
         .from('pets')
@@ -43,15 +59,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Pet não encontrado' }, { status: 404 });
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-        return NextResponse.json(
-            { error: 'Tipo de arquivo não permitido. Use JPG, PNG, WEBP ou HEIC.' },
-            { status: 400 }
-        );
-    }
-
     if (file.size > MAX_FILE_SIZE_BYTES) {
         return NextResponse.json({ error: 'Arquivo muito grande (máx. 10 MB)' }, { status: 400 });
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const kind = validateFileContent(buffer, file.type, ALLOWED_KINDS);
+    if (!kind) {
+        return NextResponse.json(
+            { error: 'Tipo de arquivo não permitido. Use JPG, PNG, WEBP ou HEIC.' },
+            { status: 400 },
+        );
     }
 
     // Check photo count limit
@@ -67,9 +85,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const storagePath = `${user.id}/${petId}/photos/${Date.now()}.${ext}`;
+    const storagePath = `${user.id}/${petId}/photos/${Date.now()}.${kind}`;
 
     const { data: uploadData, error: uploadError } = await adminClient.storage
         .from('pet-documents')
@@ -77,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
         console.error('[PetPhotos] Storage error:', uploadError);
-        return NextResponse.json({ error: uploadError.message }, { status: 500 });
+        return NextResponse.json({ error: 'Falha ao enviar foto' }, { status: 500 });
     }
 
     const { data: { publicUrl } } = adminClient.storage
@@ -97,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
         console.error('[PetPhotos] Insert error:', insertError);
-        return NextResponse.json({ error: insertError.message }, { status: 500 });
+        return NextResponse.json({ error: 'Falha ao registrar foto' }, { status: 500 });
     }
 
     return NextResponse.json(photo);
@@ -108,8 +124,17 @@ export async function DELETE(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { photoId } = await request.json();
-    if (!photoId) {
+    const rl = rateLimit(`pet-photos-del:${user.id}`, 30, 60 * 1000);
+    if (!rl.ok) {
+        return NextResponse.json(
+            { error: 'Muitas requisições. Tente novamente em alguns instantes.' },
+            { status: 429 },
+        );
+    }
+
+    const body = await request.json().catch(() => null);
+    const photoId = body?.photoId;
+    if (!photoId || typeof photoId !== 'string' || !UUID_REGEX.test(photoId)) {
         return NextResponse.json({ error: 'photoId é obrigatório' }, { status: 400 });
     }
 

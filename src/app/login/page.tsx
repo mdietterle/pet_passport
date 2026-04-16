@@ -16,11 +16,15 @@ export default function LoginPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // Read error from URL if redirected from auth/confirm
-        const searchParams = new URLSearchParams(window.location.search);
-        const urlError = searchParams.get('error');
-        if (urlError) {
-            setError(urlError);
+        // Map known error codes to hardcoded messages so attackers can't inject
+        // arbitrary phishing text via the URL.
+        const ERROR_MESSAGES: Record<string, string> = {
+            confirm_invalid: 'O link de confirmação é inválido ou expirou. Tente se registrar ou fazer login novamente.',
+            session_expired: 'Sua sessão expirou. Entre novamente.',
+        };
+        const code = new URLSearchParams(window.location.search).get('error');
+        if (code && ERROR_MESSAGES[code]) {
+            setError(ERROR_MESSAGES[code]);
         }
     }, []);
 

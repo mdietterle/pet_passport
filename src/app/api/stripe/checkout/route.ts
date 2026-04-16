@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { buildPaymentLinkUrl } from '@/lib/planUtils';
+import { rateLimit } from '@/lib/rateLimit';
 
 /**
  * POST /api/stripe/checkout
@@ -20,10 +21,15 @@ export async function POST(request: NextRequest) {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
-            console.error('[checkout] Auth error:', authError);
+            if (authError) console.error('[checkout] Auth error:', authError);
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const rl = rateLimit(`checkout:${user.id}`, 10, 60 * 1000);
+        if (!rl.ok) {
             return NextResponse.json(
-                { error: 'Unauthorized', details: authError?.message },
-                { status: 401 },
+                { error: 'Muitas requisições. Tente novamente em alguns instantes.' },
+                { status: 429, headers: { 'Retry-After': Math.ceil((rl.resetAt - Date.now()) / 1000).toString() } },
             );
         }
 
@@ -139,16 +145,10 @@ export async function POST(request: NextRequest) {
         );
     } catch (error: any) {
         console.error('[checkout] Unexpected error:', {
-            message: error.message,
-            type: error.type,
-            code: error.code,
+            message: error?.message,
+            type: error?.type,
+            code: error?.code,
         });
-        return NextResponse.json(
-            {
-                error: 'Internal server error',
-                details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-            },
-            { status: 500 },
-        );
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

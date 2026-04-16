@@ -6,6 +6,13 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, PawPrint, Loader2 } from 'lucide-react';
 
+function validatePassword(pw: string): string | null {
+    if (pw.length < 8) return 'A senha deve ter pelo menos 8 caracteres.';
+    if (!/[A-Za-z]/.test(pw)) return 'A senha deve conter pelo menos uma letra.';
+    if (!/[0-9]/.test(pw)) return 'A senha deve conter pelo menos um número.';
+    return null;
+}
+
 export default function RegisterPage() {
     const router = useRouter();
     const supabase = createClient();
@@ -22,8 +29,9 @@ export default function RegisterPage() {
         setLoading(true);
         setError('');
 
-        if (password.length < 6) {
-            setError('A senha deve ter pelo menos 6 caracteres.');
+        const pwIssue = validatePassword(password);
+        if (pwIssue) {
+            setError(pwIssue);
             setLoading(false);
             return;
         }
@@ -112,7 +120,8 @@ export default function RegisterPage() {
                                             id="password"
                                             type={showPassword ? 'text' : 'password'}
                                             className="form-input"
-                                            placeholder="Mínimo 6 caracteres"
+                                            placeholder="Mín. 8 caracteres, com letra e número"
+                                            minLength={8}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
