@@ -8,7 +8,7 @@
  * PAYMENT_LINKS maps each plan name to its Stripe Payment Link URL.
  * These links are hosted by Stripe and include professional checkout pages
  * with the product name, price, description, and marketing features.
- * Generated via Stripe MCP on 2026-04-12.
+ * Generated via Stripe MCP on 2026-04-22.
  */
 
 export const PLAN_COLORS: Record<string, string> = {
@@ -30,9 +30,9 @@ export const PLAN_COLORS: Record<string, string> = {
  * prefilled_email and client_reference_id query params.
  */
 export const PAYMENT_LINKS: Record<string, string> = {
-    basic: 'https://buy.stripe.com/test_8x29AU9WJ67FbSp7Tdgbm01',
-    pro: 'https://buy.stripe.com/test_7sYbJ27OB3Zxg8FehBgbm02',
-    premium: 'https://buy.stripe.com/test_dRm00kgl7brZ1dLb5pgbm03',
+    basic: 'https://buy.stripe.com/3cI28k1mE294agscumg3603',
+    pro: 'https://buy.stripe.com/cNicMYfduaFAcoAameg3604',
+    premium: 'https://buy.stripe.com/4gM9AMd5mcNI74g0LEg3605',
 };
 
 /**
