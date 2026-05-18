@@ -91,6 +91,9 @@ export async function POST(req: NextRequest) {
                 }
             }
 
+            const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : null;
+            const stripeCustomerId = typeof session.customer === 'string' ? session.customer : null;
+
             const { error } = await supabaseAdmin
                 .from('profiles')
                 .update({
@@ -98,6 +101,8 @@ export async function POST(req: NextRequest) {
                     subscription_status: 'active',
                     payment_method: paymentMethod,
                     plan_expires_at: expiresAt.toISOString(),
+                    ...(stripeSubscriptionId ? { stripe_subscription_id: stripeSubscriptionId } : {}),
+                    ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
                 })
                 .eq('id', userId);
 

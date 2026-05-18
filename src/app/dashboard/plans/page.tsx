@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Check, Zap } from 'lucide-react';
 import { PLAN_COLORS, PLAN_ICONS } from '@/lib/planUtils';
+import CancelPlanButton from '@/components/plans/CancelPlanButton';
 
 
-export default async function PlansPage({ searchParams }: { searchParams: { success?: string, canceled?: string, stripe_success?: string, stripe_canceled?: string } }) {
+export default async function PlansPage({ searchParams }: { searchParams: { success?: string, canceled?: string, stripe_success?: string, stripe_canceled?: string, plan_canceled?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -42,6 +43,11 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
         {searchParams.stripe_canceled === 'true' && (
           <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #ef4444' }}>
             ⚠️ Pagamento cancelado ou não concluído.
+          </div>
+        )}
+        {searchParams.plan_canceled === 'true' && (
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '1rem', borderRadius: '8px', marginTop: '1rem', border: '1px solid #ef4444' }}>
+            Sua assinatura foi cancelada. Você foi movido para o plano Gratuito.
           </div>
         )}
       </div>
@@ -121,6 +127,12 @@ export default async function PlansPage({ searchParams }: { searchParams: { succ
       <div className="plans-note">
         <p>✨ Pagamentos de PIX e Cartão processados com segurança pelo Stripe.</p>
       </div>
+
+      {currentPlan && currentPlan.price_brl > 0 && userProfile?.subscription_status !== 'canceled' && (
+        <div style={{ textAlign: 'center', marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--color-border)' }}>
+          <CancelPlanButton planName={currentPlan.display_name} />
+        </div>
+      )}
 
       <style>{`
         .plans-grid {
